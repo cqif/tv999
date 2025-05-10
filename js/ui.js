@@ -1,21 +1,150 @@
-function toggleSettings(e){if(window.isPasswordProtected&&window.isPasswordVerified){if(window.isPasswordProtected()&&!window.isPasswordVerified()){showPasswordModal&&showPasswordModal();return;}}
-e&&e.stopPropagation();const panel=document.getElementById('settingsPanel');panel.classList.toggle('show');}
-const toastQueue=[];let isShowingToast=false;function showToast(message,type='error'){toastQueue.push({message,type});if(!isShowingToast){showNextToast();}}
-function showNextToast(){if(toastQueue.length===0){isShowingToast=false;return;}
-isShowingToast=true;const{message,type}=toastQueue.shift();const toast=document.getElementById('toast');const toastMessage=document.getElementById('toastMessage');const bgColors={'error':'bg-red-500','success':'bg-green-500','info':'bg-blue-500','warning':'bg-yellow-500'};const bgColor=bgColors[type]||bgColors.error;toast.className=`fixed top-4 left-1/2 -translate-x-1/2 px-6 py-3 rounded-lg shadow-lg transform transition-all duration-300 ${bgColor} text-white z-50`;toastMessage.textContent=message;toast.style.opacity='1';toast.style.transform='translateX(-50%) translateY(0)';setTimeout(()=>{toast.style.opacity='0';toast.style.transform='translateX(-50%) translateY(-100%)';setTimeout(()=>{showNextToast();},300);},3000);}
-let loadingTimeoutId=null;function showLoading(message='加载中...'){if(loadingTimeoutId){clearTimeout(loadingTimeoutId);}
-const loading=document.getElementById('loading');const messageEl=loading.querySelector('p');messageEl.textContent=message;loading.style.display='flex';loadingTimeoutId=setTimeout(()=>{hideLoading();showToast('操作超时，请稍后重试','warning');},30000);}
-function hideLoading(){if(loadingTimeoutId){clearTimeout(loadingTimeoutId);loadingTimeoutId=null;}
-const loading=document.getElementById('loading');loading.style.display='none';}
-function updateSiteStatus(isAvailable){const statusEl=document.getElementById('siteStatus');if(isAvailable){statusEl.innerHTML='<span class="text-green-500">●</span> 可用';}else{statusEl.innerHTML='<span class="text-red-500">●</span> 不可用';}}
-function closeModal(){document.getElementById('modal').classList.add('hidden');document.getElementById('modalContent').innerHTML='';}
-function getSearchHistory(){try{const data=localStorage.getItem(SEARCH_HISTORY_KEY);if(!data)return[];const parsed=JSON.parse(data);if(!Array.isArray(parsed))return[];return parsed.map(item=>{if(typeof item==='string'){return{text:item,timestamp:0};}
-return item;}).filter(item=>item&&item.text);}catch(e){console.error('获取搜索历史出错:',e);return[];}}
-function saveSearchHistory(query){if(!query||!query.trim())return;query=query.trim().substring(0,50).replace(/</g,'&lt;').replace(/>/g,'&gt;');let history=getSearchHistory();const now=Date.now();history=history.filter(item=>typeof item==='object'&&item.timestamp&&(now-item.timestamp<5184000000));history=history.filter(item=>typeof item==='object'?item.text!==query:item!==query);history.unshift({text:query,timestamp:now});if(history.length>MAX_HISTORY_ITEMS){history=history.slice(0,MAX_HISTORY_ITEMS);}
-try{localStorage.setItem(SEARCH_HISTORY_KEY,JSON.stringify(history));}catch(e){console.error('保存搜索历史失败:',e);try{localStorage.removeItem(SEARCH_HISTORY_KEY);localStorage.setItem(SEARCH_HISTORY_KEY,JSON.stringify(history.slice(0,3)));}catch(e2){console.error('再次保存搜索历史失败:',e2);}}
-renderSearchHistory();}
-function renderSearchHistory(){const historyContainer=document.getElementById('recentSearches');if(!historyContainer)return;const history=getSearchHistory();if(history.length===0){historyContainer.innerHTML='';return;}
-historyContainer.innerHTML=`
+function toggleSettings(e) {
+    if (window.isPasswordProtected && window.isPasswordVerified) {
+        if (window.isPasswordProtected() && !window.isPasswordVerified()) {
+            showPasswordModal && showPasswordModal();
+            return;
+        }
+    }
+    e && e.stopPropagation();
+    const panel = document.getElementById('settingsPanel');
+    panel.classList.toggle('show');
+}
+const toastQueue = [];
+let isShowingToast = false;
+function showToast(message, type = 'error') {
+    toastQueue.push({
+        message,
+        type
+    });
+    if (!isShowingToast) {
+        showNextToast();
+    }
+}
+function showNextToast() {
+    if (toastQueue.length === 0) {
+        isShowingToast = false;
+        return;
+    }
+    isShowingToast = true;
+    const {
+        message,
+        type
+    } = toastQueue.shift();
+    const toast = document.getElementById('toast');
+    const toastMessage = document.getElementById('toastMessage');
+    const bgColors = {
+        'error': 'bg-red-500',
+        'success': 'bg-green-500',
+        'info': 'bg-blue-500',
+        'warning': 'bg-yellow-500'
+    };
+    const bgColor = bgColors[type] || bgColors.error;
+    toast.className = `fixed top-4 left-1/2 -translate-x-1/2 px-6 py-3 rounded-lg shadow-lg transform transition-all duration-300 ${bgColor} text-white z-50`;
+    toastMessage.textContent = message;
+    toast.style.opacity = '1';
+    toast.style.transform = 'translateX(-50%) translateY(0)';
+    setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateX(-50%) translateY(-100%)';
+        setTimeout(() => {
+            showNextToast();
+        }, 300);
+    }, 3000);
+}
+let loadingTimeoutId = null;
+function showLoading(message = '加载中...') {
+    if (loadingTimeoutId) {
+        clearTimeout(loadingTimeoutId);
+    }
+    const loading = document.getElementById('loading');
+    const messageEl = loading.querySelector('p');
+    messageEl.textContent = message;
+    loading.style.display = 'flex';
+    loadingTimeoutId = setTimeout(() => {
+        hideLoading();
+        showToast('操作超时，请稍后重试', 'warning');
+    }, 30000);
+}
+function hideLoading() {
+    if (loadingTimeoutId) {
+        clearTimeout(loadingTimeoutId);
+        loadingTimeoutId = null;
+    }
+    const loading = document.getElementById('loading');
+    loading.style.display = 'none';
+}
+function updateSiteStatus(isAvailable) {
+    const statusEl = document.getElementById('siteStatus');
+    if (isAvailable) {
+        statusEl.innerHTML = '<span class="text-green-500">●</span> 可用';
+    } else {
+        statusEl.innerHTML = '<span class="text-red-500">●</span> 不可用';
+    }
+}
+function closeModal() {
+    document.getElementById('modal').classList.add('hidden');
+    document.getElementById('modalContent').innerHTML = '';
+}
+function getSearchHistory() {
+    try {
+        const data = localStorage.getItem(SEARCH_HISTORY_KEY);
+        if (!data)
+            return [];
+        const parsed = JSON.parse(data);
+        if (!Array.isArray(parsed))
+            return [];
+        return parsed.map(item => {
+            if (typeof item === 'string') {
+                return {
+                    text: item,
+                    timestamp: 0
+                };
+            }
+            return item;
+        }).filter(item => item && item.text);
+    } catch (e) {
+        console.error('获取搜索历史出错:', e);
+        return [];
+    }
+}
+function saveSearchHistory(query) {
+    if (!query || !query.trim())
+        return;
+    query = query.trim().substring(0, 50).replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    let history = getSearchHistory();
+    const now = Date.now();
+    history = history.filter(item => typeof item === 'object' && item.timestamp && (now - item.timestamp < 5184000000));
+    history = history.filter(item => typeof item === 'object' ? item.text !== query : item !== query);
+    history.unshift({
+        text: query,
+        timestamp: now
+    });
+    if (history.length > MAX_HISTORY_ITEMS) {
+        history = history.slice(0, MAX_HISTORY_ITEMS);
+    }
+    try {
+        localStorage.setItem(SEARCH_HISTORY_KEY, JSON.stringify(history));
+    } catch (e) {
+        console.error('保存搜索历史失败:', e);
+        try {
+            localStorage.removeItem(SEARCH_HISTORY_KEY);
+            localStorage.setItem(SEARCH_HISTORY_KEY, JSON.stringify(history.slice(0, 3)));
+        } catch (e2) {
+            console.error('再次保存搜索历史失败:', e2);
+        }
+    }
+    renderSearchHistory();
+}
+function renderSearchHistory() {
+    const historyContainer = document.getElementById('recentSearches');
+    if (!historyContainer)
+        return;
+    const history = getSearchHistory();
+    if (history.length === 0) {
+        historyContainer.innerHTML = '';
+        return;
+    }
+    historyContainer.innerHTML = `
         <div class="flex justify-between items-center w-full mb-2">
             <div class="text-gray-500">最近搜索:</div>
             <button id="clearHistoryBtn" class="text-gray-500 hover:text-white transition-colors" 
@@ -23,28 +152,120 @@ historyContainer.innerHTML=`
                 清除搜索历史
             </button>
         </div>
-    `;history.forEach(item=>{const tag=document.createElement('button');tag.className='search-tag';tag.textContent=item.text;if(item.timestamp){const date=new Date(item.timestamp);tag.title=`搜索于: ${date.toLocaleString()}`;}
-tag.onclick=function(){document.getElementById('searchInput').value=item.text;search();};historyContainer.appendChild(tag);});}
-function clearSearchHistory(){if(window.isPasswordProtected&&window.isPasswordVerified){if(window.isPasswordProtected()&&!window.isPasswordVerified()){showPasswordModal&&showPasswordModal();return;}}
-try{localStorage.removeItem(SEARCH_HISTORY_KEY);renderSearchHistory();showToast('搜索历史已清除','success');}catch(e){console.error('清除搜索历史失败:',e);showToast('清除搜索历史失败:','error');}}
-function toggleHistory(e){if(window.isPasswordProtected&&window.isPasswordVerified){if(window.isPasswordProtected()&&!window.isPasswordVerified()){showPasswordModal&&showPasswordModal();return;}}
-if(e)e.stopPropagation();const panel=document.getElementById('historyPanel');if(panel){panel.classList.toggle('show');if(panel.classList.contains('show')){loadViewingHistory();}
-const settingsPanel=document.getElementById('settingsPanel');if(settingsPanel&&settingsPanel.classList.contains('show')){settingsPanel.classList.remove('show');}}}
-function formatTimestamp(timestamp){const date=new Date(timestamp);const now=new Date();const diff=now-date;if(diff<3600000){const minutes=Math.floor(diff/60000);return minutes<=0?'刚刚':`${minutes}分钟前`;}
-if(diff<86400000){const hours=Math.floor(diff/3600000);return`${hours}小时前`;}
-if(diff<604800000){const days=Math.floor(diff/86400000);return`${days}天前`;}
-const year=date.getFullYear();const month=(date.getMonth()+1).toString().padStart(2,'0');const day=date.getDate().toString().padStart(2,'0');const hour=date.getHours().toString().padStart(2,'0');const minute=date.getMinutes().toString().padStart(2,'0');return`${year}-${month}-${day} ${hour}:${minute}`;}
-function getViewingHistory(){try{const data=localStorage.getItem('viewingHistory');return data?JSON.parse(data):[];}catch(e){console.error('获取观看历史失败:',e);return[];}}
-function loadViewingHistory(){const historyList=document.getElementById('historyList');if(!historyList)return;const history=getViewingHistory();if(history.length===0){historyList.innerHTML=`<div class="text-center text-gray-500 py-8">暂无观看记录</div>`;return;}
-historyList.innerHTML=history.map(item=>{const safeTitle=item.title.replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');const safeSource=item.sourceName?item.sourceName.replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'):'未知来源';const episodeText=item.episodeIndex!==undefined?`第${item.episodeIndex + 1}集`:'';let progressHtml='';if(item.playbackPosition&&item.duration&&item.playbackPosition>10&&item.playbackPosition<item.duration*0.95){const percent=Math.round((item.playbackPosition/item.duration)*100);const formattedTime=formatPlaybackTime(item.playbackPosition);const formattedDuration=formatPlaybackTime(item.duration);progressHtml=`
+    `;
+    history.forEach(item => {
+        const tag = document.createElement('button');
+        tag.className = 'search-tag';
+        tag.textContent = item.text;
+        if (item.timestamp) {
+            const date = new Date(item.timestamp);
+            tag.title = `搜索于: ${date.toLocaleString()}`;
+        }
+        tag.onclick = function () {
+            document.getElementById('searchInput').value = item.text;
+            search();
+        };
+        historyContainer.appendChild(tag);
+    });
+}
+function clearSearchHistory() {
+    if (window.isPasswordProtected && window.isPasswordVerified) {
+        if (window.isPasswordProtected() && !window.isPasswordVerified()) {
+            showPasswordModal && showPasswordModal();
+            return;
+        }
+    }
+    try {
+        localStorage.removeItem(SEARCH_HISTORY_KEY);
+        renderSearchHistory();
+        showToast('搜索历史已清除', 'success');
+    } catch (e) {
+        console.error('清除搜索历史失败:', e);
+        showToast('清除搜索历史失败:', 'error');
+    }
+}
+function toggleHistory(e) {
+    if (window.isPasswordProtected && window.isPasswordVerified) {
+        if (window.isPasswordProtected() && !window.isPasswordVerified()) {
+            showPasswordModal && showPasswordModal();
+            return;
+        }
+    }
+    if (e)
+        e.stopPropagation();
+    const panel = document.getElementById('historyPanel');
+    if (panel) {
+        panel.classList.toggle('show');
+        if (panel.classList.contains('show')) {
+            loadViewingHistory();
+        }
+        const settingsPanel = document.getElementById('settingsPanel');
+        if (settingsPanel && settingsPanel.classList.contains('show')) {
+            settingsPanel.classList.remove('show');
+        }
+    }
+}
+function formatTimestamp(timestamp) {
+    const date = new Date(timestamp);
+    const now = new Date();
+    const diff = now - date;
+    if (diff < 3600000) {
+        const minutes = Math.floor(diff / 60000);
+        return minutes <= 0 ? '刚刚' : `${minutes}分钟前`;
+    }
+    if (diff < 86400000) {
+        const hours = Math.floor(diff / 3600000);
+        return `${hours}小时前`;
+    }
+    if (diff < 604800000) {
+        const days = Math.floor(diff / 86400000);
+        return `${days}天前`;
+    }
+    const year = date.getFullYear();
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const day = date.getDate().toString().padStart(2, '0');
+    const hour = date.getHours().toString().padStart(2, '0');
+    const minute = date.getMinutes().toString().padStart(2, '0');
+    return `${year}-${month}-${day} ${hour}:${minute}`;
+}
+function getViewingHistory() {
+    try {
+        const data = localStorage.getItem('viewingHistory');
+        return data ? JSON.parse(data) : [];
+    } catch (e) {
+        console.error('获取观看历史失败:', e);
+        return [];
+    }
+}
+function loadViewingHistory() {
+    const historyList = document.getElementById('historyList');
+    if (!historyList)
+        return;
+    const history = getViewingHistory();
+    if (history.length === 0) {
+        historyList.innerHTML = `<div class="text-center text-gray-500 py-8">暂无观看记录</div>`;
+        return;
+    }
+    historyList.innerHTML = history.map(item => {
+        const safeTitle = item.title.replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        const safeSource = item.sourceName ? item.sourceName.replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;') : '未知来源';
+        const episodeText = item.episodeIndex !== undefined ? `第${item.episodeIndex + 1}集` : '';
+        let progressHtml = '';
+        if (item.playbackPosition && item.duration && item.playbackPosition > 10 && item.playbackPosition < item.duration * 0.95) {
+            const percent = Math.round((item.playbackPosition / item.duration) * 100);
+            const formattedTime = formatPlaybackTime(item.playbackPosition);
+            const formattedDuration = formatPlaybackTime(item.duration);
+            progressHtml = `
                 <div class="history-progress">
                     <div class="progress-bar">
                         <div class="progress-filled" style="width:${percent}%"></div>
                     </div>
                     <div class="progress-text">${formattedTime} / ${formattedDuration}</div>
                 </div>
-            `;}
-const safeURL=encodeURIComponent(item.url);return`
+            `;
+        }
+        const safeURL = encodeURIComponent(item.url);
+        return `
             <div class="history-item cursor-pointer relative group" onclick="playFromHistory('${item.url}', '${safeTitle}', ${item.episodeIndex || 0}, ${item.playbackPosition || 0})">
                 <button onclick="event.stopPropagation(); deleteHistoryItem('${safeURL}')" 
                         class="absolute right-2 top-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 text-gray-400 hover:text-red-400 p-1 rounded-full hover:bg-gray-800 z-10"
@@ -64,26 +285,169 @@ const safeURL=encodeURIComponent(item.url);return`
                     <div class="history-time">${formatTimestamp(item.timestamp)}</div>
                 </div>
             </div>
-        `;}).join('');if(history.length>5){historyList.classList.add('pb-4');}}
-function formatPlaybackTime(seconds){if(!seconds||isNaN(seconds))return'00:00';const minutes=Math.floor(seconds/60);const remainingSeconds=Math.floor(seconds%60);return`${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;}
-function deleteHistoryItem(encodedUrl){try{const url=decodeURIComponent(encodedUrl);const history=getViewingHistory();const newHistory=history.filter(item=>item.url!==url);localStorage.setItem('viewingHistory',JSON.stringify(newHistory));loadViewingHistory();showToast('已删除该记录','success');}catch(e){console.error('删除历史记录项失败:',e);showToast('删除记录失败','error');}}
-function playFromHistory(url,title,episodeIndex,playbackPosition=0){try{let episodesList=[];const historyRaw=localStorage.getItem('viewingHistory');if(historyRaw){const history=JSON.parse(historyRaw);const historyItem=history.find(item=>item.title===title);if(historyItem&&historyItem.episodes&&Array.isArray(historyItem.episodes)){episodesList=historyItem.episodes;console.log(`从历史记录找到视频 ${title} 的集数数据:`,episodesList.length);}}
-if(episodesList.length===0){try{const storedEpisodes=JSON.parse(localStorage.getItem('currentEpisodes')||'[]');if(storedEpisodes.length>0){episodesList=storedEpisodes;console.log(`使用localStorage中的集数数据:`,episodesList.length);}}catch(e){console.error('解析currentEpisodes失败:',e);}}
-if(episodesList.length>0){localStorage.setItem('currentEpisodes',JSON.stringify(episodesList));console.log(`已将剧集列表保存到localStorage，共 ${episodesList.length} 集`);}
-const positionParam=playbackPosition>10?`&position=${Math.floor(playbackPosition)}`:'';if(url.includes('?')){const playUrl=new URL(url);if(!playUrl.searchParams.has('index')&&episodeIndex>0){playUrl.searchParams.set('index',episodeIndex);}
-if(playbackPosition>10){playUrl.searchParams.set('position',Math.floor(playbackPosition).toString());}
-window.location.href=playUrl.toString();}else{const playerUrl=`player.html?url=${encodeURIComponent(url)}&title=${encodeURIComponent(title)}&index=${episodeIndex}${positionParam}`;window.location.href=playerUrl;}}catch(e){console.error('从历史记录播放失败:',e);const simpleUrl=`player.html?url=${encodeURIComponent(url)}&title=${encodeURIComponent(title)}&index=${episodeIndex}`;window.location.href=simpleUrl;}}
-function addToViewingHistory(videoInfo){if(window.isPasswordProtected&&window.isPasswordVerified){if(window.isPasswordProtected()&&!window.isPasswordVerified()){showPasswordModal&&showPasswordModal();return;}}
-try{const history=getViewingHistory();const existingIndex=history.findIndex(item=>item.title===videoInfo.title);if(existingIndex!==-1){const existingItem=history[existingIndex];existingItem.episodeIndex=videoInfo.episodeIndex;existingItem.timestamp=Date.now();if(videoInfo.sourceName&&!existingItem.sourceName){existingItem.sourceName=videoInfo.sourceName;}
-if(videoInfo.playbackPosition&&videoInfo.playbackPosition>10){existingItem.playbackPosition=videoInfo.playbackPosition;existingItem.duration=videoInfo.duration||existingItem.duration;}
-existingItem.url=videoInfo.url;if(videoInfo.episodes&&Array.isArray(videoInfo.episodes)&&videoInfo.episodes.length>0){if(!existingItem.episodes||!Array.isArray(existingItem.episodes)||existingItem.episodes.length!==videoInfo.episodes.length){console.log(`更新 "${videoInfo.title}" 的剧集数据: ${videoInfo.episodes.length}集`);existingItem.episodes=[...videoInfo.episodes];}}
-history.splice(existingIndex,1);history.unshift(existingItem);}else{const newItem={...videoInfo,timestamp:Date.now()};if(videoInfo.episodes&&Array.isArray(videoInfo.episodes)){newItem.episodes=[...videoInfo.episodes];console.log(`保存新视频 "${videoInfo.title}" 的剧集数据: ${videoInfo.episodes.length}集`);}else{newItem.episodes=[];}
-history.unshift(newItem);}
-const maxHistoryItems=50;if(history.length>maxHistoryItems){history.splice(maxHistoryItems);}
-localStorage.setItem('viewingHistory',JSON.stringify(history));}catch(e){console.error('保存观看历史失败:',e);}}
-function clearViewingHistory(){try{localStorage.removeItem('viewingHistory');loadViewingHistory();showToast('观看历史已清空','success');}catch(e){console.error('清除观看历史失败:',e);showToast('清除观看历史失败','error');}}
-const originalToggleSettings=toggleSettings;toggleSettings=function(e){if(e)e.stopPropagation();originalToggleSettings(e);const historyPanel=document.getElementById('historyPanel');if(historyPanel&&historyPanel.classList.contains('show')){historyPanel.classList.remove('show');}};document.addEventListener('DOMContentLoaded',function(){document.addEventListener('click',function(e){const historyPanel=document.getElementById('historyPanel');const historyButton=document.querySelector('button[onclick="toggleHistory(event)"]');if(historyPanel&&historyButton&&!historyPanel.contains(e.target)&&!historyButton.contains(e.target)&&historyPanel.classList.contains('show')){historyPanel.classList.remove('show');}});});function clearLocalStorage(){let modal=document.getElementById('messageBoxModal');if(modal){document.body.removeChild(modal);}
-modal=document.createElement('div');modal.id='messageBoxModal';modal.className='fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-40';modal.innerHTML=`
+        `;
+    }).join('');
+    if (history.length > 5) {
+        historyList.classList.add('pb-4');
+    }
+}
+function formatPlaybackTime(seconds) {
+    if (!seconds || isNaN(seconds))
+        return '00:00';
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = Math.floor(seconds % 60);
+    return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
+}
+function deleteHistoryItem(encodedUrl) {
+    try {
+        const url = decodeURIComponent(encodedUrl);
+        const history = getViewingHistory();
+        const newHistory = history.filter(item => item.url !== url);
+        localStorage.setItem('viewingHistory', JSON.stringify(newHistory));
+        loadViewingHistory();
+        showToast('已删除该记录', 'success');
+    } catch (e) {
+        console.error('删除历史记录项失败:', e);
+        showToast('删除记录失败', 'error');
+    }
+}
+function playFromHistory(url, title, episodeIndex, playbackPosition = 0) {
+    try {
+        let episodesList = [];
+        const historyRaw = localStorage.getItem('viewingHistory');
+        if (historyRaw) {
+            const history = JSON.parse(historyRaw);
+            const historyItem = history.find(item => item.title === title);
+            if (historyItem && historyItem.episodes && Array.isArray(historyItem.episodes)) {
+                episodesList = historyItem.episodes;
+                console.log(`从历史记录找到视频 ${title} 的集数数据:`, episodesList.length);
+            }
+        }
+        if (episodesList.length === 0) {
+            try {
+                const storedEpisodes = JSON.parse(localStorage.getItem('currentEpisodes') || '[]');
+                if (storedEpisodes.length > 0) {
+                    episodesList = storedEpisodes;
+                    console.log(`使用localStorage中的集数数据:`, episodesList.length);
+                }
+            } catch (e) {
+                console.error('解析currentEpisodes失败:', e);
+            }
+        }
+        if (episodesList.length > 0) {
+            localStorage.setItem('currentEpisodes', JSON.stringify(episodesList));
+            console.log(`已将剧集列表保存到localStorage，共 ${episodesList.length} 集`);
+        }
+        const positionParam = playbackPosition > 10 ? `&position=${Math.floor(playbackPosition)}` : '';
+        if (url.includes('?')) {
+            const playUrl = new URL(url);
+            if (!playUrl.searchParams.has('index') && episodeIndex > 0) {
+                playUrl.searchParams.set('index', episodeIndex);
+            }
+            if (playbackPosition > 10) {
+                playUrl.searchParams.set('position', Math.floor(playbackPosition).toString());
+            }
+            window.location.href = playUrl.toString();
+        } else {
+            const playerUrl = `player.html?url=${encodeURIComponent(url)}&title=${encodeURIComponent(title)}&index=${episodeIndex}${positionParam}`;
+            window.location.href = playerUrl;
+        }
+    } catch (e) {
+        console.error('从历史记录播放失败:', e);
+        const simpleUrl = `player.html?url=${encodeURIComponent(url)}&title=${encodeURIComponent(title)}&index=${episodeIndex}`;
+        window.location.href = simpleUrl;
+    }
+}
+function addToViewingHistory(videoInfo) {
+    if (window.isPasswordProtected && window.isPasswordVerified) {
+        if (window.isPasswordProtected() && !window.isPasswordVerified()) {
+            showPasswordModal && showPasswordModal();
+            return;
+        }
+    }
+    try {
+        const history = getViewingHistory();
+        const existingIndex = history.findIndex(item => item.title === videoInfo.title);
+        if (existingIndex !== -1) {
+            const existingItem = history[existingIndex];
+            existingItem.episodeIndex = videoInfo.episodeIndex;
+            existingItem.timestamp = Date.now();
+            if (videoInfo.sourceName && !existingItem.sourceName) {
+                existingItem.sourceName = videoInfo.sourceName;
+            }
+            if (videoInfo.playbackPosition && videoInfo.playbackPosition > 10) {
+                existingItem.playbackPosition = videoInfo.playbackPosition;
+                existingItem.duration = videoInfo.duration || existingItem.duration;
+            }
+            existingItem.url = videoInfo.url;
+            if (videoInfo.episodes && Array.isArray(videoInfo.episodes) && videoInfo.episodes.length > 0) {
+                if (!existingItem.episodes || !Array.isArray(existingItem.episodes) || existingItem.episodes.length !== videoInfo.episodes.length) {
+                    console.log(`更新 "${videoInfo.title}" 的剧集数据: ${videoInfo.episodes.length}集`);
+                    existingItem.episodes = [...videoInfo.episodes];
+                }
+            }
+            history.splice(existingIndex, 1);
+            history.unshift(existingItem);
+        } else {
+            const newItem = {
+                ...videoInfo,
+                timestamp: Date.now()
+            };
+            if (videoInfo.episodes && Array.isArray(videoInfo.episodes)) {
+                newItem.episodes = [...videoInfo.episodes];
+                console.log(`保存新视频 "${videoInfo.title}" 的剧集数据: ${videoInfo.episodes.length}集`);
+            } else {
+                newItem.episodes = [];
+            }
+            history.unshift(newItem);
+        }
+        const maxHistoryItems = 50;
+        if (history.length > maxHistoryItems) {
+            history.splice(maxHistoryItems);
+        }
+        localStorage.setItem('viewingHistory', JSON.stringify(history));
+    } catch (e) {
+        console.error('保存观看历史失败:', e);
+    }
+}
+function clearViewingHistory() {
+    try {
+        localStorage.removeItem('viewingHistory');
+        loadViewingHistory();
+        showToast('观看历史已清空', 'success');
+    } catch (e) {
+        console.error('清除观看历史失败:', e);
+        showToast('清除观看历史失败', 'error');
+    }
+}
+const originalToggleSettings = toggleSettings;
+toggleSettings = function (e) {
+    if (e)
+        e.stopPropagation();
+    originalToggleSettings(e);
+    const historyPanel = document.getElementById('historyPanel');
+    if (historyPanel && historyPanel.classList.contains('show')) {
+        historyPanel.classList.remove('show');
+    }
+};
+document.addEventListener('DOMContentLoaded', function () {
+    document.addEventListener('click', function (e) {
+        const historyPanel = document.getElementById('historyPanel');
+        const historyButton = document.querySelector('button[onclick="toggleHistory(event)"]');
+        if (historyPanel && historyButton && !historyPanel.contains(e.target) && !historyButton.contains(e.target) && historyPanel.classList.contains('show')) {
+            historyPanel.classList.remove('show');
+        }
+    });
+});
+function clearLocalStorage() {
+    let modal = document.getElementById('messageBoxModal');
+    if (modal) {
+        document.body.removeChild(modal);
+    }
+    modal = document.createElement('div');
+    modal.id = 'messageBoxModal';
+    modal.className = 'fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-40';
+    modal.innerHTML = `
         <div class="bg-[#191919] rounded-lg p-6 max-w-md w-full max-h-[90vh] overflow-y-auto relative">
             <button id="closeBoxModal" class="absolute top-4 right-4 text-gray-400 hover:text-white text-xl">&times;</button>
             
@@ -97,7 +461,14 @@ modal=document.createElement('div');modal.id='messageBoxModal';modal.className='
                     <button id="cancelBoxModal" class="ml-2 bg-pink-600 hover:bg-pink-700 text-white px-4 py-1 rounded">取消</button>
                 </div>
             </div>
-        </div>`;document.body.appendChild(modal);document.getElementById('closeBoxModal').addEventListener('click',function(){document.body.removeChild(modal);});document.getElementById('confirmBoxModal').addEventListener('click',function(){localStorage.clear();modal.innerHTML=`
+        </div>`;
+    document.body.appendChild(modal);
+    document.getElementById('closeBoxModal').addEventListener('click', function () {
+        document.body.removeChild(modal);
+    });
+    document.getElementById('confirmBoxModal').addEventListener('click', function () {
+        localStorage.clear();
+        modal.innerHTML = `
             <div class="bg-[#191919] rounded-lg p-6 max-w-md w-full max-h-[90vh] overflow-y-auto relative">
                 <button id="closeBoxModal" class="absolute top-4 right-4 text-gray-400 hover:text-white text-xl">&times;</button>
                 
@@ -106,9 +477,29 @@ modal=document.createElement('div');modal.id='messageBoxModal';modal.className='
                 <div class="mb-4">
                     <div class="text-sm font-medium text-gray-300 mb-4">页面缓存已清除，3 秒后自动刷新本页面。</div>
                 </div>
-            </div>`;setTimeout(()=>{window.location.reload();},3000);});document.getElementById('cancelBoxModal').addEventListener('click',function(){document.body.removeChild(modal);});modal.addEventListener('click',function(e){if(e.target===modal){document.body.removeChild(modal);}});}
-function showImportBox(fun){let modal=document.getElementById('showImportBoxModal');if(modal){document.body.removeChild(modal);}
-modal=document.createElement('div');modal.id='showImportBoxModal';modal.className='fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-40';modal.innerHTML=`
+            </div>`;
+        setTimeout(() => {
+            window.location.reload();
+        }, 3000);
+    });
+    document.getElementById('cancelBoxModal').addEventListener('click', function () {
+        document.body.removeChild(modal);
+    });
+    modal.addEventListener('click', function (e) {
+        if (e.target === modal) {
+            document.body.removeChild(modal);
+        }
+    });
+}
+function showImportBox(fun) {
+    let modal = document.getElementById('showImportBoxModal');
+    if (modal) {
+        document.body.removeChild(modal);
+    }
+    modal = document.createElement('div');
+    modal.id = 'showImportBoxModal';
+    modal.className = 'fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-40';
+    modal.innerHTML = `
         <div class="bg-[#191919] rounded-lg p-6 max-w-md w-full max-h-[90vh] overflow-y-auto relative">
             <button id="closeBoxModal" class="absolute top-4 right-4 text-gray-400 hover:text-white text-xl">&times;</button>
             
@@ -132,4 +523,30 @@ modal=document.createElement('div');modal.id='showImportBoxModal';modal.classNam
                     </div>
                 </div>
             </div>
-        </div>`;document.body.appendChild(modal);document.getElementById('closeBoxModal').addEventListener('click',function(){document.body.removeChild(modal);});modal.addEventListener('click',function(e){if(e.target===modal){document.body.removeChild(modal);}});const dropZone=document.getElementById('dropZone');const fileInput=document.getElementById('ChooseFile');dropZone.addEventListener('dragover',(e)=>{e.preventDefault();dropZone.classList.add('border-blue-500');});dropZone.addEventListener('dragleave',()=>{dropZone.classList.remove('border-blue-500');});dropZone.addEventListener('drop',(e)=>{e.preventDefault();fun(e.dataTransfer.files[0]);});fileInput.addEventListener('change',(e)=>{fun(fileInput.files[0]);});}
+        </div>`;
+    document.body.appendChild(modal);
+    document.getElementById('closeBoxModal').addEventListener('click', function () {
+        document.body.removeChild(modal);
+    });
+    modal.addEventListener('click', function (e) {
+        if (e.target === modal) {
+            document.body.removeChild(modal);
+        }
+    });
+    const dropZone = document.getElementById('dropZone');
+    const fileInput = document.getElementById('ChooseFile');
+    dropZone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dropZone.classList.add('border-blue-500');
+    });
+    dropZone.addEventListener('dragleave', () => {
+        dropZone.classList.remove('border-blue-500');
+    });
+    dropZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        fun(e.dataTransfer.files[0]);
+    });
+    fileInput.addEventListener('change', (e) => {
+        fun(fileInput.files[0]);
+    });
+}
