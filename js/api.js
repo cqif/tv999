@@ -10,6 +10,7 @@ async function handleApiRequest(url) {
                 throw new Error('缺少搜索参数');
             }
             
+            // 验证API和source的有效性
             if (source === 'custom' && !customApi) {
                 throw new Error('使用自定义API时必须提供API地址');
             }
@@ -22,6 +23,7 @@ async function handleApiRequest(url) {
                 ? `${customApi}${API_CONFIG.search.path}${encodeURIComponent(searchQuery)}`
                 : `${API_SITES[source].api}${API_CONFIG.search.path}${encodeURIComponent(searchQuery)}`;
             
+            // 添加超时处理
             const controller = new AbortController();
             const timeoutId = setTimeout(() => controller.abort(), 10000);
             
@@ -64,6 +66,7 @@ async function handleApiRequest(url) {
             }
         }
 
+        // 详情处理
         if (url.pathname === '/api/detail') {
             const id = url.searchParams.get('id');
             const sourceCode = url.searchParams.get('source') || 'heimuer'; // 获取源代码
@@ -72,10 +75,12 @@ async function handleApiRequest(url) {
                 throw new Error('缺少视频ID参数');
             }
             
+            // 验证ID格式 - 只允许数字和有限的特殊字符
             if (!/^[\w-]+$/.test(id)) {
                 throw new Error('无效的视频ID格式');
             }
 
+            // 验证API和source的有效性
             if (sourceCode === 'custom' && !customApi) {
                 throw new Error('使用自定义API时必须提供API地址');
             }
@@ -84,10 +89,12 @@ async function handleApiRequest(url) {
                 throw new Error('无效的API来源');
             }
 
+            // 对于特殊源，使用特殊处理方式
             if ((sourceCode === 'ffzy' || sourceCode === 'jisu' || sourceCode === 'huangcang') && API_SITES[sourceCode].detail) {
                 return await handleSpecialSourceDetail(id, sourceCode);
             }
             
+            // 如果是自定义API，并且传递了detail参数，尝试特殊处理
             if (sourceCode === 'custom' && url.searchParams.get('useDetail') === 'true') {
                 return await handleCustomApiSpecialDetail(id, customApi);
             }
@@ -96,6 +103,7 @@ async function handleApiRequest(url) {
                 ? `${customApi}${API_CONFIG.detail.path}${id}`
                 : `${API_SITES[sourceCode].api}${API_CONFIG.detail.path}${id}`;
             
+            // 添加超时处理
             const controller = new AbortController();
             const timeoutId = setTimeout(() => controller.abort(), 10000);
             
@@ -186,13 +194,17 @@ async function handleApiRequest(url) {
     }
 }
 
+// 处理自定义API的特殊详情页
 async function handleCustomApiSpecialDetail(id, customApi) {
     try {
+        // 构建详情页URL
         const detailUrl = `${customApi}/index.php/vod/detail/id/${id}.html`;
         
+        // 添加超时处理
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 10000);
         
+        // 获取详情页HTML
         const response = await fetch(PROXY_URL + encodeURIComponent(detailUrl), {
             headers: {
                 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
@@ -206,17 +218,21 @@ async function handleCustomApiSpecialDetail(id, customApi) {
             throw new Error(`自定义API详情页请求失败: ${response.status}`);
         }
         
+        // 获取HTML内容
         const html = await response.text();
         
+        // 使用通用模式提取m3u8链接
         const generalPattern = /\$(https?:\/\/[^"'\s]+?\.m3u8)/g;
         let matches = html.match(generalPattern) || [];
         
+        // 处理链接
         matches = matches.map(link => {
             link = link.substring(1, link.length);
             const parenIndex = link.indexOf('(');
             return parenIndex > 0 ? link.substring(0, parenIndex) : link;
         });
         
+        // 提取基本信息
         const titleMatch = html.match(/<h1[^>]*>([^<]+)<\/h1>/);
         const titleText = titleMatch ? titleMatch[1].trim() : '';
         
@@ -240,23 +256,29 @@ async function handleCustomApiSpecialDetail(id, customApi) {
     }
 }
 
+// 处理极速资源详情的特殊函数
 async function handleJisuDetail(id, sourceCode) {
     // 直接复用通用的特殊源处理函数，传入相应参数
     return await handleSpecialSourceDetail(id, sourceCode);
 }
 
+// 处理非凡影视详情的特殊函数
 async function handleFFZYDetail(id, sourceCode) {
     // 直接复用通用的特殊源处理函数，传入相应参数
     return await handleSpecialSourceDetail(id, sourceCode);
 }
 
+// 通用特殊源详情处理函数
 async function handleSpecialSourceDetail(id, sourceCode) {
     try {
+        // 构建详情页URL（使用配置中的detail URL而不是api URL）
         const detailUrl = `${API_SITES[sourceCode].detail}/index.php/vod/detail/id/${id}.html`;
         
+        // 添加超时处理
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 10000);
         
+        // 获取详情页HTML
         const response = await fetch(PROXY_URL + encodeURIComponent(detailUrl), {
             headers: {
                 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
@@ -270,26 +292,33 @@ async function handleSpecialSourceDetail(id, sourceCode) {
             throw new Error(`详情页请求失败: ${response.status}`);
         }
         
+        // 获取HTML内容
         const html = await response.text();
         
+        // 根据不同源类型使用不同的正则表达式
         let matches = [];
         
         if (sourceCode === 'ffzy') {
+            // 非凡影视使用特定的正则表达式
             const ffzyPattern = /\$(https?:\/\/[^"'\s]+?\/\d{8}\/\d+_[a-f0-9]+\/index\.m3u8)/g;
             matches = html.match(ffzyPattern) || [];
         }
         
+        // 如果没有找到链接或者是其他源类型，尝试一个更通用的模式
         if (matches.length === 0) {
             const generalPattern = /\$(https?:\/\/[^"'\s]+?\.m3u8)/g;
             matches = html.match(generalPattern) || [];
         }
+        // 去重处理，避免一个播放源多集显示
         matches = [...new Set(matches)];
+        // 处理链接
         matches = matches.map(link => {
             link = link.substring(1, link.length);
             const parenIndex = link.indexOf('(');
             return parenIndex > 0 ? link.substring(0, parenIndex) : link;
         });
         
+        // 提取可能存在的标题、简介等基本信息
         const titleMatch = html.match(/<h1[^>]*>([^<]+)<\/h1>/);
         const titleText = titleMatch ? titleMatch[1].trim() : '';
         
@@ -313,6 +342,7 @@ async function handleSpecialSourceDetail(id, sourceCode) {
     }
 }
 
+// 处理聚合搜索
 async function handleAggregatedSearch(searchQuery) {
     // 获取可用的API源列表（排除aggregated和custom）
     const availableSources = Object.keys(API_SITES).filter(key => 
@@ -328,6 +358,7 @@ async function handleAggregatedSearch(searchQuery) {
         try {
             const apiUrl = `${API_SITES[source].api}${API_CONFIG.search.path}${encodeURIComponent(searchQuery)}`;
             
+            // 使用Promise.race添加超时处理
             const timeoutPromise = new Promise((_, reject) => 
                 setTimeout(() => reject(new Error(`${source}源搜索超时`)), 8000)
             );
@@ -348,6 +379,7 @@ async function handleAggregatedSearch(searchQuery) {
                 throw new Error(`${source}源返回的数据格式无效`);
             }
             
+            // 为搜索结果添加源信息
             const results = data.list.map(item => ({
                 ...item,
                 source_name: API_SITES[source].name,
@@ -362,8 +394,10 @@ async function handleAggregatedSearch(searchQuery) {
     });
     
     try {
+        // 并行执行所有搜索请求
         const resultsArray = await Promise.all(searchPromises);
         
+        // 合并所有结果
         let allResults = [];
         resultsArray.forEach(results => {
             if (Array.isArray(results) && results.length > 0) {
@@ -371,6 +405,7 @@ async function handleAggregatedSearch(searchQuery) {
             }
         });
         
+        // 如果没有搜索结果，返回空结果
         if (allResults.length === 0) {
             return JSON.stringify({
                 code: 200,
@@ -379,6 +414,7 @@ async function handleAggregatedSearch(searchQuery) {
             });
         }
         
+        // 去重（根据vod_id和source_code组合）
         const uniqueResults = [];
         const seen = new Set();
         
@@ -390,10 +426,13 @@ async function handleAggregatedSearch(searchQuery) {
             }
         });
         
+        // 按照视频名称和来源排序
         uniqueResults.sort((a, b) => {
+            // 首先按照视频名称排序
             const nameCompare = (a.vod_name || '').localeCompare(b.vod_name || '');
             if (nameCompare !== 0) return nameCompare;
             
+            // 如果名称相同，则按照来源排序
             return (a.source_name || '').localeCompare(b.source_name || '');
         });
         
@@ -411,6 +450,7 @@ async function handleAggregatedSearch(searchQuery) {
     }
 }
 
+// 处理多个自定义API源的聚合搜索
 async function handleMultipleCustomSearch(searchQuery, customApiUrls) {
     // 解析自定义API列表
     const apiUrls = customApiUrls.split(CUSTOM_API_CONFIG.separator)
@@ -427,6 +467,7 @@ async function handleMultipleCustomSearch(searchQuery, customApiUrls) {
         try {
             const fullUrl = `${apiUrl}${API_CONFIG.search.path}${encodeURIComponent(searchQuery)}`;
             
+            // 使用Promise.race添加超时处理
             const timeoutPromise = new Promise((_, reject) => 
                 setTimeout(() => reject(new Error(`自定义API ${index+1} 搜索超时`)), 8000)
             );
@@ -447,6 +488,7 @@ async function handleMultipleCustomSearch(searchQuery, customApiUrls) {
                 throw new Error(`自定义API ${index+1} 返回的数据格式无效`);
             }
             
+            // 为搜索结果添加源信息
             const results = data.list.map(item => ({
                 ...item,
                 source_name: `${CUSTOM_API_CONFIG.namePrefix}${index+1}`,
@@ -462,8 +504,10 @@ async function handleMultipleCustomSearch(searchQuery, customApiUrls) {
     });
     
     try {
+        // 并行执行所有搜索请求
         const resultsArray = await Promise.all(searchPromises);
         
+        // 合并所有结果
         let allResults = [];
         resultsArray.forEach(results => {
             if (Array.isArray(results) && results.length > 0) {
@@ -471,6 +515,7 @@ async function handleMultipleCustomSearch(searchQuery, customApiUrls) {
             }
         });
         
+        // 如果没有搜索结果，返回空结果
         if (allResults.length === 0) {
             return JSON.stringify({
                 code: 200,
@@ -479,6 +524,7 @@ async function handleMultipleCustomSearch(searchQuery, customApiUrls) {
             });
         }
         
+        // 去重（根据vod_id和api_url组合）
         const uniqueResults = [];
         const seen = new Set();
         
@@ -504,6 +550,7 @@ async function handleMultipleCustomSearch(searchQuery, customApiUrls) {
     }
 }
 
+// 拦截API请求
 (function() {
     const originalFetch = window.fetch;
     
@@ -537,22 +584,27 @@ async function handleMultipleCustomSearch(searchQuery, customApiUrls) {
             }
         }
         
+        // 非API请求使用原始fetch
         return originalFetch.apply(this, arguments);
     };
 })();
 
 async function testSiteAvailability(apiUrl) {
     try {
+        // 使用更简单的测试查询
         const response = await fetch('/api/search?wd=test&customApi=' + encodeURIComponent(apiUrl), {
+            // 添加超时
             signal: AbortSignal.timeout(5000)
         });
         
+        // 检查响应状态
         if (!response.ok) {
             return false;
         }
         
         const data = await response.json();
         
+        // 检查API响应的有效性
         return data && data.code !== 400 && Array.isArray(data.list);
     } catch (error) {
         console.error('站点可用性测试失败:', error);

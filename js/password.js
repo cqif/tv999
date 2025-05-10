@@ -17,6 +17,7 @@ function isPasswordProtected() {
  */
 function isPasswordVerified() {
     try {
+        // 如果没有设置密码保护，则视为已验证
         if (!isPasswordProtected()) {
             return true;
         }
@@ -24,8 +25,10 @@ function isPasswordVerified() {
         const verificationData = JSON.parse(localStorage.getItem(PASSWORD_CONFIG.localStorageKey) || '{}');
         const { verified, timestamp, passwordHash } = verificationData;
         
+        // 获取当前环境中的密码哈希
         const currentHash = window.__ENV__ && window.__ENV__.PASSWORD;
         
+        // 验证是否已验证、未过期，且密码哈希未更改
         if (verified && timestamp && passwordHash === currentHash) {
             const now = Date.now();
             const expiry = timestamp + PASSWORD_CONFIG.verificationTTL;
@@ -61,6 +64,7 @@ async function verifyPassword(password) {
     return isValid;
 }
 
+// SHA-256实现，可用Web Crypto API
 async function sha256(message) {
     if (window.crypto && crypto.subtle && crypto.subtle.digest) {
         const msgBuffer = new TextEncoder().encode(message);
@@ -83,6 +87,7 @@ function showPasswordModal() {
     if (passwordModal) {
         passwordModal.style.display = 'flex';
         
+        // 确保输入框获取焦点
         setTimeout(() => {
             const passwordInput = document.getElementById('passwordInput');
             if (passwordInput) {
@@ -132,6 +137,7 @@ async function handlePasswordSubmit() {
         hidePasswordError();
         hidePasswordModal();
 
+        // 触发密码验证成功事件
         document.dispatchEvent(new CustomEvent('passwordVerified'));
     } else {
         showPasswordError();
@@ -154,11 +160,13 @@ function initPasswordProtection() {
     if (!isPasswordVerified()) {
         showPasswordModal();
         
+        // 设置密码提交按钮事件监听
         const submitButton = document.getElementById('passwordSubmitBtn');
         if (submitButton) {
             submitButton.addEventListener('click', handlePasswordSubmit);
         }
         
+        // 设置密码输入框回车键监听
         const passwordInput = document.getElementById('passwordInput');
         if (passwordInput) {
             passwordInput.addEventListener('keypress', function(e) {
@@ -170,4 +178,5 @@ function initPasswordProtection() {
     }
 }
 
+// 在页面加载完成后初始化密码保护
 document.addEventListener('DOMContentLoaded', initPasswordProtection);

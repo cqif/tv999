@@ -1,10 +1,9 @@
-// 全局常量配置
-const PROXY_URL = '/proxy/';    // 适用于 Cloudflare, Netlify (带重写), Vercel (带重写)
+const PROXY_URL = '/proxy/';
 const SEARCH_HISTORY_KEY = 'videoSearchHistory';
 const MAX_HISTORY_ITEMS = 5;
 
 const PASSWORD_CONFIG = {
-    localStorageKey: 'passwordVerified',  // 存储验证状态的键名
+    localStorageKey: 'passwordVerified',
     verificationTTL: 90 * 24 * 60 * 60 * 1000,  // 验证有效期（90天，约3个月）
 };
 
@@ -128,16 +127,15 @@ const API_SITES = {
 };
 
 const AGGREGATED_SEARCH_CONFIG = {
-    enabled: true,             // 是否启用聚合搜索
-    timeout: 8000,            // 单个源超时时间（毫秒）
-    maxResults: 10000,          // 最大结果数量
-    parallelRequests: true,   // 是否并行请求所有源
-    showSourceBadges: true    // 是否显示来源徽章
+    enabled: true,
+    timeout: 8000,
+    maxResults: 10000,
+    parallelRequests: true,
+    showSourceBadges: true
 };
 
 const API_CONFIG = {
     search: {
-    	// 修改搜索接口为返回更多详细数据（包括视频封面、简介和播放列表）
         path: '/api.php/provide/vod/?ac=videolist&wd=',
         headers: {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
@@ -145,7 +143,6 @@ const API_CONFIG = {
         }
     },
     detail: {
-    	// 修改详情接口也使用videolist接口，但是通过ID查询，减少请求次数
         path: '/api.php/provide/vod/?ac=videolist&ids=',
         headers: {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
@@ -156,18 +153,18 @@ const API_CONFIG = {
 
 const M3U8_PATTERN = /\$https?:\/\/[^"'\s]+?\.m3u8/g;
 
-const CUSTOM_PLAYER_URL = 'player.html'; // 使用相对路径引用本地player.html
+const CUSTOM_PLAYER_URL = 'player.html';
 
 const PLAYER_CONFIG = {
     autoplay: true,
     allowFullscreen: true,
     width: '100%',
     height: '600',
-    timeout: 15000,  // 播放器加载超时时间
-    filterAds: true,  // 是否启用广告过滤
-    autoPlayNext: true,  // 默认启用自动连播功能
-    adFilteringEnabled: true, // 默认开启分片广告过滤
-    adFilteringStorage: 'adFilteringEnabled' // 存储广告过滤设置的键名
+    timeout: 15000,
+    filterAds: true,
+    autoPlayNext: true,
+    adFilteringEnabled: true,
+    adFilteringStorage: 'adFilteringEnabled'
 };
 
 const ERROR_MESSAGES = {
@@ -179,21 +176,20 @@ const ERROR_MESSAGES = {
 };
 
 const SECURITY_CONFIG = {
-    enableXSSProtection: true,  // 是否启用XSS保护
-    sanitizeUrls: true,         // 是否清理URL
-    maxQueryLength: 100,        // 最大搜索长度
-    // allowedApiDomains 不再需要，因为所有请求都通过内部代理
+    enableXSSProtection: true,
+    sanitizeUrls: true,
+    maxQueryLength: 100,
 };
 
 const CUSTOM_API_CONFIG = {
-    separator: ',',           // 分隔符
-    maxSources: 5,            // 最大允许的自定义源数量
-    testTimeout: 5000,        // 测试超时时间(毫秒)
-    namePrefix: 'Custom-',    // 自定义源名称前缀
-    validateUrl: true,        // 验证URL格式
-    cacheResults: true,       // 缓存测试结果
-    cacheExpiry: 5184000000,  // 缓存过期时间(2个月)
-    adultPropName: 'isAdult' // 用于标记成人内容的属性名
+    separator: ',',
+    maxSources: 5,
+    testTimeout: 5000,
+    namePrefix: 'Custom-',
+    validateUrl: true,
+    cacheResults: true,
+    cacheExpiry: 5184000000,
+    adultPropName: 'isAdult'
 };
 
 const HIDE_BUILTIN_ADULT_APIS = true;
