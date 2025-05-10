@@ -1,27 +1,22 @@
-
+// UI相关函数
 function toggleSettings(e) {
-
     if (window.isPasswordProtected && window.isPasswordVerified) {
         if (window.isPasswordProtected() && !window.isPasswordVerified()) {
             showPasswordModal && showPasswordModal();
             return;
         }
     }
-
     e && e.stopPropagation();
     const panel = document.getElementById('settingsPanel');
     panel.classList.toggle('show');
 }
 
-
 const toastQueue = [];
 let isShowingToast = false;
 
 function showToast(message, type = 'error') {
-
     toastQueue.push({ message, type });
     
-
     if (!isShowingToast) {
         showNextToast();
     }
@@ -50,27 +45,22 @@ function showNextToast() {
     toast.className = `fixed top-4 left-1/2 -translate-x-1/2 px-6 py-3 rounded-lg shadow-lg transform transition-all duration-300 ${bgColor} text-white z-50`;
     toastMessage.textContent = message;
     
-
     toast.style.opacity = '1';
     toast.style.transform = 'translateX(-50%) translateY(0)';
     
-
     setTimeout(() => {
         toast.style.opacity = '0';
         toast.style.transform = 'translateX(-50%) translateY(-100%)';
         
-    
         setTimeout(() => {
             showNextToast();
         }, 300);
     }, 3000);
 }
 
-
 let loadingTimeoutId = null;
 
 function showLoading(message = '加载中...') {
-
     if (loadingTimeoutId) {
         clearTimeout(loadingTimeoutId);
     }
@@ -80,7 +70,6 @@ function showLoading(message = '加载中...') {
     messageEl.textContent = message;
     loading.style.display = 'flex';
     
-
     loadingTimeoutId = setTimeout(() => {
         hideLoading();
         showToast('操作超时，请稍后重试', 'warning');
@@ -88,7 +77,6 @@ function showLoading(message = '加载中...') {
 }
 
 function hideLoading() {
-
     if (loadingTimeoutId) {
         clearTimeout(loadingTimeoutId);
         loadingTimeoutId = null;
@@ -109,10 +97,8 @@ function updateSiteStatus(isAvailable) {
 
 function closeModal() {
     document.getElementById('modal').classList.add('hidden');
-
     document.getElementById('modalContent').innerHTML = '';
 }
-
 
 function getSearchHistory() {
     try {
@@ -121,10 +107,8 @@ function getSearchHistory() {
         
         const parsed = JSON.parse(data);
         
-    
         if (!Array.isArray(parsed)) return [];
         
-    
         return parsed.map(item => {
             if (typeof item === 'string') {
                 return { text: item, timestamp: 0 };
@@ -137,35 +121,28 @@ function getSearchHistory() {
     }
 }
 
-
 function saveSearchHistory(query) {
     if (!query || !query.trim()) return;
     
-
     query = query.trim().substring(0, 50).replace(/</g, '&lt;').replace(/>/g, '&gt;');
     
     let history = getSearchHistory();
     
-
     const now = Date.now();
     
-
     history = history.filter(item => 
         typeof item === 'object' && item.timestamp && (now - item.timestamp < 5184000000)
     );
     
-
     history = history.filter(item => 
         typeof item === 'object' ? item.text !== query : item !== query
     );
     
-
     history.unshift({
         text: query,
         timestamp: now
     });
     
-
     if (history.length > MAX_HISTORY_ITEMS) {
         history = history.slice(0, MAX_HISTORY_ITEMS);
     }
@@ -174,7 +151,6 @@ function saveSearchHistory(query) {
         localStorage.setItem(SEARCH_HISTORY_KEY, JSON.stringify(history));
     } catch (e) {
         console.error('保存搜索历史失败:', e);
-    
         try {
             localStorage.removeItem(SEARCH_HISTORY_KEY);
             localStorage.setItem(SEARCH_HISTORY_KEY, JSON.stringify(history.slice(0, 3)));
@@ -185,7 +161,6 @@ function saveSearchHistory(query) {
     
     renderSearchHistory();
 }
-
 
 function renderSearchHistory() {
     const historyContainer = document.getElementById('recentSearches');
@@ -198,7 +173,6 @@ function renderSearchHistory() {
         return;
     }
     
-
     historyContainer.innerHTML = `
         <div class="flex justify-between items-center w-full mb-2">
             <div class="text-gray-500">最近搜索:</div>
@@ -214,7 +188,6 @@ function renderSearchHistory() {
         tag.className = 'search-tag';
         tag.textContent = item.text;
         
-    
         if (item.timestamp) {
             const date = new Date(item.timestamp);
             tag.title = `搜索于: ${date.toLocaleString()}`;
@@ -228,9 +201,7 @@ function renderSearchHistory() {
     });
 }
 
-
 function clearSearchHistory() {
-
     if (window.isPasswordProtected && window.isPasswordVerified) {
         if (window.isPasswordProtected() && !window.isPasswordVerified()) {
             showPasswordModal && showPasswordModal();
@@ -247,9 +218,7 @@ function clearSearchHistory() {
     }
 }
 
-
 function toggleHistory(e) {
-
     if (window.isPasswordProtected && window.isPasswordVerified) {
         if (window.isPasswordProtected() && !window.isPasswordVerified()) {
             showPasswordModal && showPasswordModal();
@@ -262,12 +231,10 @@ function toggleHistory(e) {
     if (panel) {
         panel.classList.toggle('show');
         
-    
         if (panel.classList.contains('show')) {
             loadViewingHistory();
         }
         
-    
         const settingsPanel = document.getElementById('settingsPanel');
         if (settingsPanel && settingsPanel.classList.contains('show')) {
             settingsPanel.classList.remove('show');
@@ -275,31 +242,26 @@ function toggleHistory(e) {
     }
 }
 
-
 function formatTimestamp(timestamp) {
     const date = new Date(timestamp);
     const now = new Date();
     const diff = now - date;
     
-
     if (diff < 3600000) {
         const minutes = Math.floor(diff / 60000);
         return minutes <= 0 ? '刚刚' : `${minutes}分钟前`;
     }
     
-
     if (diff < 86400000) {
         const hours = Math.floor(diff / 3600000);
         return `${hours}小时前`;
     }
     
-
     if (diff < 604800000) {
         const days = Math.floor(diff / 86400000);
         return `${days}天前`;
     }
     
-
     const year = date.getFullYear();
     const month = (date.getMonth() + 1).toString().padStart(2, '0');
     const day = date.getDate().toString().padStart(2, '0');
@@ -308,7 +270,6 @@ function formatTimestamp(timestamp) {
     
     return `${year}-${month}-${day} ${hour}:${minute}`;
 }
-
 
 function getViewingHistory() {
     try {
@@ -319,7 +280,6 @@ function getViewingHistory() {
         return [];
     }
 }
-
 
 function loadViewingHistory() {
     const historyList = document.getElementById('historyList');
@@ -332,9 +292,7 @@ function loadViewingHistory() {
         return;
     }
     
-
     historyList.innerHTML = history.map(item => {
-    
         const safeTitle = item.title
             .replace(/</g, '&lt;')
             .replace(/>/g, '&gt;')
@@ -347,7 +305,6 @@ function loadViewingHistory() {
         const episodeText = item.episodeIndex !== undefined ? 
             `第${item.episodeIndex + 1}集` : '';
         
-    
         let progressHtml = '';
         if (item.playbackPosition && item.duration && item.playbackPosition > 10 && item.playbackPosition < item.duration * 0.95) {
             const percent = Math.round((item.playbackPosition / item.duration) * 100);
@@ -364,10 +321,8 @@ function loadViewingHistory() {
             `;
         }
         
-    
         const safeURL = encodeURIComponent(item.url);
         
-    
         return `
             <div class="history-item cursor-pointer relative group" onclick="playFromHistory('${item.url}', '${safeTitle}', ${item.episodeIndex || 0}, ${item.playbackPosition || 0})">
                 <button onclick="event.stopPropagation(); deleteHistoryItem('${safeURL}')" 
@@ -391,12 +346,10 @@ function loadViewingHistory() {
         `;
     }).join('');
     
-
     if (history.length > 5) {
         historyList.classList.add('pb-4');
     }
 }
-
 
 function formatPlaybackTime(seconds) {
     if (!seconds || isNaN(seconds)) return '00:00';
@@ -407,25 +360,18 @@ function formatPlaybackTime(seconds) {
     return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
 }
 
-
 function deleteHistoryItem(encodedUrl) {
     try {
-    
         const url = decodeURIComponent(encodedUrl);
         
-    
         const history = getViewingHistory();
         
-    
         const newHistory = history.filter(item => item.url !== url);
         
-    
         localStorage.setItem('viewingHistory', JSON.stringify(newHistory));
         
-    
         loadViewingHistory();
         
-    
         showToast('已删除该记录', 'success');
     } catch (e) {
         console.error('删除历史记录项失败:', e);
@@ -433,27 +379,21 @@ function deleteHistoryItem(encodedUrl) {
     }
 }
 
-
 function playFromHistory(url, title, episodeIndex, playbackPosition = 0) {
     try {
-    
         let episodesList = [];
         
-    
         const historyRaw = localStorage.getItem('viewingHistory');
         if (historyRaw) {
             const history = JSON.parse(historyRaw);
-        
             const historyItem = history.find(item => item.title === title);
             
-        
             if (historyItem && historyItem.episodes && Array.isArray(historyItem.episodes)) {
                 episodesList = historyItem.episodes;
                 console.log(`从历史记录找到视频 ${title} 的集数数据:`, episodesList.length);
             }
         }
         
-    
         if (episodesList.length === 0) {
             try {
                 const storedEpisodes = JSON.parse(localStorage.getItem('currentEpisodes') || '[]');
@@ -466,16 +406,13 @@ function playFromHistory(url, title, episodeIndex, playbackPosition = 0) {
             }
         }
         
-    
         if (episodesList.length > 0) {
             localStorage.setItem('currentEpisodes', JSON.stringify(episodesList));
             console.log(`已将剧集列表保存到localStorage，共 ${episodesList.length} 集`);
         }
-    
         const positionParam = playbackPosition > 10 ? `&position=${Math.floor(playbackPosition)}` : '';
         
         if (url.includes('?')) {
-        
             const playUrl = new URL(url);
             if (!playUrl.searchParams.has('index') && episodeIndex > 0) {
                 playUrl.searchParams.set('index', episodeIndex);
@@ -485,21 +422,17 @@ function playFromHistory(url, title, episodeIndex, playbackPosition = 0) {
             }
             window.location.href = playUrl.toString();
         } else {
-        
             const playerUrl = `player.html?url=${encodeURIComponent(url)}&title=${encodeURIComponent(title)}&index=${episodeIndex}${positionParam}`;
             window.location.href = playerUrl;
         }
     } catch (e) {
         console.error('从历史记录播放失败:', e);
-    
         const simpleUrl = `player.html?url=${encodeURIComponent(url)}&title=${encodeURIComponent(title)}&index=${episodeIndex}`;
         window.location.href = simpleUrl;
     }
 }
 
-
 function addToViewingHistory(videoInfo) {
-
     if (window.isPasswordProtected && window.isPasswordVerified) {
         if (window.isPasswordProtected() && !window.isPasswordVerified()) {
             showPasswordModal && showPasswordModal();
@@ -509,32 +442,25 @@ function addToViewingHistory(videoInfo) {
     try {
         const history = getViewingHistory();
         
-    
         const existingIndex = history.findIndex(item => item.title === videoInfo.title);
         if (existingIndex !== -1) {
-        
             const existingItem = history[existingIndex];
             existingItem.episodeIndex = videoInfo.episodeIndex;
             existingItem.timestamp = Date.now();
             
-        
             if (videoInfo.sourceName && !existingItem.sourceName) {
                 existingItem.sourceName = videoInfo.sourceName;
             }
             
-        
             if (videoInfo.playbackPosition && videoInfo.playbackPosition > 10) {
                 existingItem.playbackPosition = videoInfo.playbackPosition;
                 existingItem.duration = videoInfo.duration || existingItem.duration;
             }
             
-        
             existingItem.url = videoInfo.url;
             
-        
-        
             if (videoInfo.episodes && Array.isArray(videoInfo.episodes) && videoInfo.episodes.length > 0) {
-            
+                // 如果传入的集数数据与当前保存的不同，则更新
                 if (!existingItem.episodes || 
                     !Array.isArray(existingItem.episodes) || 
                     existingItem.episodes.length !== videoInfo.episodes.length) {
@@ -543,41 +469,35 @@ function addToViewingHistory(videoInfo) {
                 }
             }
             
-        
             history.splice(existingIndex, 1);
             history.unshift(existingItem);
         } else {
-        
             const newItem = {
                 ...videoInfo,
                 timestamp: Date.now()
             };
             
-        
             if (videoInfo.episodes && Array.isArray(videoInfo.episodes)) {
                 newItem.episodes = [...videoInfo.episodes]; // 使用深拷贝
                 console.log(`保存新视频 "${videoInfo.title}" 的剧集数据: ${videoInfo.episodes.length}集`);
             } else {
-            
+                // 如果没有提供episodes，初始化为空数组
                 newItem.episodes = [];
             }
             
             history.unshift(newItem);
         }
         
-    
         const maxHistoryItems = 50;
         if (history.length > maxHistoryItems) {
             history.splice(maxHistoryItems);
         }
         
-    
         localStorage.setItem('viewingHistory', JSON.stringify(history));
     } catch (e) {
         console.error('保存观看历史失败:', e);
     }
 }
-
 
 function clearViewingHistory() {
     try {
@@ -590,21 +510,17 @@ function clearViewingHistory() {
     }
 }
 
-
 const originalToggleSettings = toggleSettings;
 toggleSettings = function(e) {
     if (e) e.stopPropagation();
     
-
     originalToggleSettings(e);
     
-
     const historyPanel = document.getElementById('historyPanel');
     if (historyPanel && historyPanel.classList.contains('show')) {
         historyPanel.classList.remove('show');
     }
 };
-
 
 document.addEventListener('DOMContentLoaded', function() {
     document.addEventListener('click', function(e) {
@@ -620,14 +536,11 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
-
 function clearLocalStorage() {
-
     let modal = document.getElementById('messageBoxModal');
     if (modal) {
         document.body.removeChild(modal);
     }
-
 
     modal = document.createElement('div');
     modal.id = 'messageBoxModal';
@@ -649,14 +562,11 @@ function clearLocalStorage() {
             </div>
         </div>`;
 
-
     document.body.appendChild(modal);
-
 
     document.getElementById('closeBoxModal').addEventListener('click', function () {
         document.body.removeChild(modal);
     });
-
 
     document.getElementById('confirmBoxModal').addEventListener('click', function () {
         localStorage.clear();
@@ -675,11 +585,9 @@ function clearLocalStorage() {
         }, 3000);
     });
 
-
     document.getElementById('cancelBoxModal').addEventListener('click', function () {
         document.body.removeChild(modal);
     });
-
 
     modal.addEventListener('click', function (e) {
         if (e.target === modal) {
@@ -688,14 +596,11 @@ function clearLocalStorage() {
     });
 }
 
-
 function showImportBox(fun) {
-
     let modal = document.getElementById('showImportBoxModal');
     if (modal) {
         document.body.removeChild(modal);
     }
-
 
     modal = document.createElement('div');
     modal.id = 'showImportBoxModal';
@@ -727,21 +632,17 @@ function showImportBox(fun) {
             </div>
         </div>`;
 
-
     document.body.appendChild(modal);
-
 
     document.getElementById('closeBoxModal').addEventListener('click', function () {
         document.body.removeChild(modal);
     });
-
 
     modal.addEventListener('click', function (e) {
         if (e.target === modal) {
             document.body.removeChild(modal);
         }
     });
-
 
     const dropZone = document.getElementById('dropZone');
     const fileInput = document.getElementById('ChooseFile');

@@ -1,23 +1,14 @@
 
 
-/**
- * 检查是否设置了密码保护
- * 通过读取页面上嵌入的环境变量来检查
- */
 function isPasswordProtected() {
-
+    // 检查页面上嵌入的环境变量
     const pwd = window.__ENV__ && window.__ENV__.PASSWORD;
-
     return typeof pwd === 'string' && pwd.length === 64 && !/^0+$/.test(pwd);
 }
 
-/**
- * 检查用户是否已通过密码验证
- * 检查localStorage中的验证状态和时间戳是否有效，并确认密码哈希未更改
- */
 function isPasswordVerified() {
     try {
-    
+
         if (!isPasswordProtected()) {
             return true;
         }
@@ -25,10 +16,10 @@ function isPasswordVerified() {
         const verificationData = JSON.parse(localStorage.getItem(PASSWORD_CONFIG.localStorageKey) || '{}');
         const { verified, timestamp, passwordHash } = verificationData;
         
-    
+
         const currentHash = window.__ENV__ && window.__ENV__.PASSWORD;
         
-    
+
         if (verified && timestamp && passwordHash === currentHash) {
             const now = Date.now();
             const expiry = timestamp + PASSWORD_CONFIG.verificationTTL;
@@ -72,7 +63,7 @@ async function sha256(message) {
         const hashArray = Array.from(new Uint8Array(hashBuffer));
         return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
     }
-
+    // HTTP 下调用原始 js‑sha256
     if (typeof window._jsSha256 === 'function') {
         return window._jsSha256(message);
     }
@@ -87,7 +78,7 @@ function showPasswordModal() {
     if (passwordModal) {
         passwordModal.style.display = 'flex';
         
-    
+
         setTimeout(() => {
             const passwordInput = document.getElementById('passwordInput');
             if (passwordInput) {
@@ -137,7 +128,7 @@ async function handlePasswordSubmit() {
         hidePasswordError();
         hidePasswordModal();
 
-    
+
         document.dispatchEvent(new CustomEvent('passwordVerified'));
     } else {
         showPasswordError();
@@ -156,17 +147,17 @@ function initPasswordProtection() {
         return; // 如果未设置密码保护，则不进行任何操作
     }
     
-
+    // 如果未验证密码，则显示密码验证弹窗
     if (!isPasswordVerified()) {
         showPasswordModal();
         
-    
+
         const submitButton = document.getElementById('passwordSubmitBtn');
         if (submitButton) {
             submitButton.addEventListener('click', handlePasswordSubmit);
         }
         
-    
+
         const passwordInput = document.getElementById('passwordInput');
         if (passwordInput) {
             passwordInput.addEventListener('keypress', function(e) {

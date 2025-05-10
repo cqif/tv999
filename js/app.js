@@ -13,51 +13,42 @@ let episodesReversed = false;
 
 
 document.addEventListener('DOMContentLoaded', function() {
-
     initAPICheckboxes();
     
-
     renderCustomAPIsList();
     
-
     updateSelectedApiCount();
     
-
     renderSearchHistory();
     
-
     if (!localStorage.getItem('hasInitializedDefaults')) {
-    
+
         selectedAPIs = ["tyyszy", "bfzy", "ruyi"];
         localStorage.setItem('selectedAPIs', JSON.stringify(selectedAPIs));
         
-    
+
         localStorage.setItem('yellowFilterEnabled', 'true');
         localStorage.setItem(PLAYER_CONFIG.adFilteringStorage, 'true');
         
-    
+
         localStorage.setItem('doubanEnabled', 'true');
 
-    
+
         localStorage.setItem('hasInitializedDefaults', 'true');
     }
     
-
     const yellowFilterToggle = document.getElementById('yellowFilterToggle');
     if (yellowFilterToggle) {
         yellowFilterToggle.checked = localStorage.getItem('yellowFilterEnabled') === 'true';
     }
     
-
     const adFilterToggle = document.getElementById('adFilterToggle');
     if (adFilterToggle) {
         adFilterToggle.checked = localStorage.getItem(PLAYER_CONFIG.adFilteringStorage) !== 'false'; // 默认为true
     }
     
-
     setupEventListeners();
     
-
     setTimeout(checkAdultAPIsSelected, 100);
 });
 
@@ -65,7 +56,6 @@ document.addEventListener('DOMContentLoaded', function() {
 function initAPICheckboxes() {
     const container = document.getElementById('apiCheckboxes');
     container.innerHTML = '';
-
 
     const normaldiv = document.createElement('div');
     normaldiv.id = 'normaldiv';
@@ -75,7 +65,6 @@ function initAPICheckboxes() {
     normalTitle.textContent = '普通资源';
     normaldiv.appendChild(normalTitle);
     
-
     Object.keys(API_SITES).forEach(apiKey => {
         const api = API_SITES[apiKey];
         if (api.adult) return; // 跳过成人内容API，稍后添加
@@ -93,7 +82,7 @@ function initAPICheckboxes() {
         `;
         normaldiv.appendChild(checkbox);
         
-    
+
         checkbox.querySelector('input').addEventListener('change', function() {
             updateSelectedAPIs();
             checkAdultAPIsSelected();
@@ -101,20 +90,17 @@ function initAPICheckboxes() {
     });
     container.appendChild(normaldiv);
 
-
     addAdultAPI();
-
 
     checkAdultAPIsSelected();
 }
 
 
 function addAdultAPI() {
-
     if (!HIDE_BUILTIN_ADULT_APIS && (localStorage.getItem('yellowFilterEnabled') === 'false')) {
         const container = document.getElementById('apiCheckboxes');
 
-    
+
         const adultdiv = document.createElement('div');
         adultdiv.id = 'adultdiv';
         adultdiv.className = 'grid grid-cols-2 gap-2';
@@ -127,7 +113,7 @@ function addAdultAPI() {
         </span>`;
         adultdiv.appendChild(adultTitle);
         
-    
+
         Object.keys(API_SITES).forEach(apiKey => {
             const api = API_SITES[apiKey];
             if (!api.adult) return; // 仅添加成人内容API
@@ -145,7 +131,7 @@ function addAdultAPI() {
             `;
             adultdiv.appendChild(checkbox);
             
-        
+
             checkbox.querySelector('input').addEventListener('change', function() {
                 updateSelectedAPIs();
                 checkAdultAPIsSelected();
@@ -157,10 +143,8 @@ function addAdultAPI() {
 
 
 function checkAdultAPIsSelected() {
-
     const adultBuiltinCheckboxes = document.querySelectorAll('#apiCheckboxes .api-adult:checked');
     
-
     const customApiCheckboxes = document.querySelectorAll('#customApisList .api-adult:checked');
     
     const hasAdultSelected = adultBuiltinCheckboxes.length > 0 || customApiCheckboxes.length > 0;
@@ -169,36 +153,35 @@ function checkAdultAPIsSelected() {
     const yellowFilterContainer = yellowFilterToggle.closest('div').parentNode;
     const filterDescription = yellowFilterContainer.querySelector('p.filter-description');
     
-
     if (hasAdultSelected) {
         yellowFilterToggle.checked = false;
         yellowFilterToggle.disabled = true;
         localStorage.setItem('yellowFilterEnabled', 'false');
         
-    
+
         yellowFilterContainer.classList.add('filter-disabled');
         
-    
+
         if (filterDescription) {
             filterDescription.innerHTML = '<strong class="text-pink-300">选中黄色资源站时无法启用此过滤</strong>';
         }
         
-    
+
         const existingTooltip = yellowFilterContainer.querySelector('.filter-tooltip');
         if (existingTooltip) {
             existingTooltip.remove();
         }
     } else {
-    
+
         yellowFilterToggle.disabled = false;
         yellowFilterContainer.classList.remove('filter-disabled');
         
-    
+
         if (filterDescription) {
             filterDescription.innerHTML = '过滤"伦理片"等黄色内容';
         }
         
-    
+
         const existingTooltip = yellowFilterContainer.querySelector('.filter-tooltip');
         if (existingTooltip) {
             existingTooltip.remove();
@@ -221,10 +204,10 @@ function renderCustomAPIsList() {
         const apiItem = document.createElement('div');
         apiItem.className = 'flex items-center justify-between p-1 mb-1 bg-[#222] rounded';
         
-    
+
         const textColorClass = api.isAdult ? 'text-pink-400' : 'text-white';
         
-    
+
         const adultTag = api.isAdult ? '<span class="text-xs text-pink-400 mr-1">(18+)</span>' : '';
         
         apiItem.innerHTML = `
@@ -247,7 +230,7 @@ function renderCustomAPIsList() {
         `;
         container.appendChild(apiItem);
         
-    
+
         apiItem.querySelector('input').addEventListener('change', function() {
             updateSelectedAPIs();
             checkAdultAPIsSelected();
@@ -261,7 +244,6 @@ function editCustomApi(index) {
     
     const api = customAPIs[index];
     
-
     const nameInput = document.getElementById('customApiName');
     const urlInput = document.getElementById('customApiUrl');
     const isAdultInput = document.getElementById('customApiIsAdult');
@@ -270,12 +252,11 @@ function editCustomApi(index) {
     urlInput.value = api.url;
     if (isAdultInput) isAdultInput.checked = api.isAdult || false;
     
-
     const form = document.getElementById('addCustomApiForm');
     if (form) {
         form.classList.remove('hidden');
         
-    
+
         const buttonContainer = form.querySelector('div:last-child');
         buttonContainer.innerHTML = `
             <button onclick="updateCustomApi(${index})" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-xs">更新</button>
@@ -301,31 +282,24 @@ function updateCustomApi(index) {
         return;
     }
     
-
     if (!/^https?:\/\/.+/.test(url)) {
         showToast('API链接格式不正确，需以http://或https://开头', 'warning');
         return;
     }
     
-
     if (url.endsWith('/')) {
         url = url.slice(0, -1);
     }
     
-
     customAPIs[index] = { name, url, isAdult };
     localStorage.setItem('customAPIs', JSON.stringify(customAPIs));
     
-
     renderCustomAPIsList();
     
-
     checkAdultAPIsSelected();
     
-
     restoreAddCustomApiButtons();
     
-
     nameInput.value = '';
     urlInput.value = '';
     if (isAdultInput) isAdultInput.checked = false;
@@ -336,16 +310,13 @@ function updateCustomApi(index) {
 
 
 function cancelEditCustomApi() {
-
     document.getElementById('customApiName').value = '';
     document.getElementById('customApiUrl').value = '';
     const isAdultInput = document.getElementById('customApiIsAdult');
     if (isAdultInput) isAdultInput.checked = false;
     
-
     document.getElementById('addCustomApiForm').classList.add('hidden');
     
-
     restoreAddCustomApiButtons();
 }
 
@@ -361,23 +332,17 @@ function restoreAddCustomApiButtons() {
 
 
 function updateSelectedAPIs() {
-
     const builtInApiCheckboxes = document.querySelectorAll('#apiCheckboxes input:checked');
     
-
     const builtInApis = Array.from(builtInApiCheckboxes).map(input => input.dataset.api);
     
-
     const customApiCheckboxes = document.querySelectorAll('#customApisList input:checked');
     const customApiIndices = Array.from(customApiCheckboxes).map(input => 'custom_' + input.dataset.customIndex);
     
-
     selectedAPIs = [...builtInApis, ...customApiIndices];
     
-
     localStorage.setItem('selectedAPIs', JSON.stringify(selectedAPIs));
     
-
     updateSelectedApiCount();
 }
 
@@ -423,7 +388,7 @@ function cancelAddCustomApi() {
         const isAdultInput = document.getElementById('customApiIsAdult');
         if (isAdultInput) isAdultInput.checked = false;
         
-    
+
         restoreAddCustomApiButtons();
     }
 }
@@ -443,36 +408,28 @@ function addCustomApi() {
         return;
     }
     
-
     if (!/^https?:\/\/.+/.test(url)) {
         showToast('API链接格式不正确，需以http://或https://开头', 'warning');
         return;
     }
     
-
     if (url.endsWith('/')) {
         url = url.slice(0, -1);
     }
     
-
     customAPIs.push({ name, url, isAdult });
     localStorage.setItem('customAPIs', JSON.stringify(customAPIs));
     
-
     const newApiIndex = customAPIs.length - 1;
     selectedAPIs.push('custom_' + newApiIndex);
     localStorage.setItem('selectedAPIs', JSON.stringify(selectedAPIs));
     
-
     renderCustomAPIsList();
     
-
     updateSelectedApiCount();
     
-
     checkAdultAPIsSelected();
     
-
     nameInput.value = '';
     urlInput.value = '';
     if (isAdultInput) isAdultInput.checked = false;
@@ -487,15 +444,12 @@ function removeCustomApi(index) {
     
     const apiName = customAPIs[index].name;
     
-
     customAPIs.splice(index, 1);
     localStorage.setItem('customAPIs', JSON.stringify(customAPIs));
     
-
     const customApiId = 'custom_' + index;
     selectedAPIs = selectedAPIs.filter(id => id !== customApiId);
     
-
     selectedAPIs = selectedAPIs.map(id => {
         if (id.startsWith('custom_')) {
             const currentIndex = parseInt(id.replace('custom_', ''));
@@ -508,13 +462,10 @@ function removeCustomApi(index) {
     
     localStorage.setItem('selectedAPIs', JSON.stringify(selectedAPIs));
     
-
     renderCustomAPIsList();
     
-
     updateSelectedApiCount();
     
-
     checkAdultAPIsSelected();
     
     showToast('已移除自定义API: ' + apiName, 'info');
@@ -522,13 +473,11 @@ function removeCustomApi(index) {
 
 
 function setupEventListeners() {
-
     document.getElementById('searchInput').addEventListener('keypress', function(e) {
         if (e.key === 'Enter') {
             search();
         }
     });
-
 
     document.addEventListener('click', function(e) {
         const panel = document.getElementById('settingsPanel');
@@ -539,13 +488,12 @@ function setupEventListeners() {
         }
     });
     
-
     const yellowFilterToggle = document.getElementById('yellowFilterToggle');
     if (yellowFilterToggle) {
         yellowFilterToggle.addEventListener('change', function(e) {
             localStorage.setItem('yellowFilterEnabled', e.target.checked);
 
-        
+
             const adultdiv = document.getElementById('adultdiv');
             if (adultdiv) {
                 if (e.target.checked === true) {
@@ -554,13 +502,12 @@ function setupEventListeners() {
                     adultdiv.style.display = ''
                 }
             } else {
-            
+    
                 addAdultAPI();
             }
         });
     }
     
-
     const adFilterToggle = document.getElementById('adFilterToggle');
     if (adFilterToggle) {
         adFilterToggle.addEventListener('change', function(e) {
@@ -571,22 +518,18 @@ function setupEventListeners() {
 
 
 function resetSearchArea() {
-
     document.getElementById('results').innerHTML = '';
     document.getElementById('searchInput').value = '';
     
-
     document.getElementById('searchArea').classList.add('flex-1');
     document.getElementById('searchArea').classList.remove('mb-8');
     document.getElementById('resultsArea').classList.add('hidden');
     
-
     const footer = document.querySelector('.footer');
     if (footer) {
         footer.style.position = '';
     }
     
-
     if (typeof updateDoubanVisibility === 'function') {
         updateDoubanVisibility();
     }
@@ -603,7 +546,6 @@ function getCustomApiInfo(customApiIndex) {
 
 
 async function search() {
-
     if (window.isPasswordProtected && window.isPasswordVerified) {
         if (window.isPasswordProtected() && !window.isPasswordVerified()) {
             showPasswordModal && showPasswordModal();
@@ -625,16 +567,16 @@ async function search() {
     showLoading();
     
     try {
-    
+
         saveSearchHistory(query);
         
-    
+
         let allResults = [];
         const searchPromises = selectedAPIs.map(async (apiId) => {
             try {
                 let apiUrl, apiName;
                 
-            
+    
                 if (apiId.startsWith('custom_')) {
                     const customIndex = apiId.replace('custom_', '');
                     const customApi = getCustomApiInfo(customIndex);
@@ -643,13 +585,13 @@ async function search() {
                     apiUrl = customApi.url + API_CONFIG.search.path + encodeURIComponent(query);
                     apiName = customApi.name;
                 } else {
-                
+        
                     if (!API_SITES[apiId]) return [];
                     apiUrl = API_SITES[apiId].api + API_CONFIG.search.path + encodeURIComponent(query);
                     apiName = API_SITES[apiId].name;
                 }
                 
-            
+    
                 const controller = new AbortController();
                 const timeoutId = setTimeout(() => controller.abort(), 8000);
                 
@@ -670,7 +612,7 @@ async function search() {
                     return [];
                 }
                 
-            
+    
                 const results = data.list.map(item => ({
                     ...item,
                     source_name: apiName,
@@ -685,28 +627,28 @@ async function search() {
             }
         });
         
-    
+
         const resultsArray = await Promise.all(searchPromises);
         
-    
+
         resultsArray.forEach(results => {
             if (Array.isArray(results) && results.length > 0) {
                 allResults = allResults.concat(results);
             }
         });
         
-    
+
         const searchResultsCount = document.getElementById('searchResultsCount');
         if (searchResultsCount) {
             searchResultsCount.textContent = allResults.length;
         }
         
-    
+
         document.getElementById('searchArea').classList.remove('flex-1');
         document.getElementById('searchArea').classList.add('mb-8');
         document.getElementById('resultsArea').classList.remove('hidden');
         
-    
+
         const doubanArea = document.getElementById('doubanArea');
         if (doubanArea) {
             doubanArea.classList.add('hidden');
@@ -714,7 +656,7 @@ async function search() {
         
         const resultsDiv = document.getElementById('results');
         
-    
+
         if (!allResults || allResults.length === 0) {
             resultsDiv.innerHTML = `
                 <div class="col-span-full text-center py-16">
@@ -730,7 +672,7 @@ async function search() {
             return;
         }
 
-    
+
         const yellowFilterEnabled = localStorage.getItem('yellowFilterEnabled') === 'true';
         if (yellowFilterEnabled) {
             const banned = ['伦理片','福利','里番动漫','门事件','萝莉少女','制服诱惑','国产传媒','cosplay','黑丝诱惑','无码','日本无码','有码','日本有码','SWAG','网红主播', '色情片','同性片','福利视频','福利片'];
@@ -740,7 +682,7 @@ async function search() {
             });
         }
 
-    
+
         resultsDiv.innerHTML = allResults.map(item => {
             const safeId = item.vod_id ? item.vod_id.toString().replace(/[^\w-]/g, '') : '';
             const safeName = (item.vod_name || '').toString()
@@ -751,11 +693,11 @@ async function search() {
                 `<span class="bg-[#222] text-xs px-1.5 py-0.5 rounded-full">${item.source_name}</span>` : '';
             const sourceCode = item.source_code || '';
             
-        
+
             const apiUrlAttr = item.api_url ? 
                 `data-api-url="${item.api_url.replace(/"/g, '&quot;')}"` : '';
             
-        
+
             const hasCover = item.vod_pic && item.vod_pic.startsWith('http');
             
             return `
@@ -822,7 +764,6 @@ async function search() {
 
 
 async function showDetails(id, vod_name, sourceCode) {
-
     if (window.isPasswordProtected && window.isPasswordVerified) {
         if (window.isPasswordProtected() && !window.isPasswordVerified()) {
             showPasswordModal && showPasswordModal();
@@ -836,10 +777,10 @@ async function showDetails(id, vod_name, sourceCode) {
     
     showLoading();
     try {
-    
+
         let apiParams = '';
         
-    
+
         if (sourceCode.startsWith('custom_')) {
             const customIndex = sourceCode.replace('custom_', '');
             const customApi = getCustomApiInfo(customIndex);
@@ -851,7 +792,7 @@ async function showDetails(id, vod_name, sourceCode) {
             
             apiParams = '&customApi=' + encodeURIComponent(customApi.url) + '&source=custom';
         } else {
-        
+
             apiParams = '&source=' + sourceCode;
         }
         
@@ -863,19 +804,19 @@ async function showDetails(id, vod_name, sourceCode) {
         const modalTitle = document.getElementById('modalTitle');
         const modalContent = document.getElementById('modalContent');
         
-    
+
         const sourceName = data.videoInfo && data.videoInfo.source_name ? 
             ` <span class="text-sm font-normal text-gray-400">(${data.videoInfo.source_name})</span>` : '';
         
-    
+
         modalTitle.innerHTML = `<span class="break-words">${vod_name || '未知视频'}</span>${sourceName}`;
         currentVideoTitle = vod_name || '未知视频';
         
         if (data.episodes && data.episodes.length > 0) {
-        
+
             const safeEpisodes = data.episodes.map(url => {
                 try {
-                
+        
                     return url && (url.startsWith('http://') || url.startsWith('https://'))
                         ? url.replace(/"/g, '&quot;')
                         : '';
@@ -884,7 +825,7 @@ async function showDetails(id, vod_name, sourceCode) {
                 }
             }).filter(url => url); // 过滤掉空URL
             
-        
+
             currentEpisodes = safeEpisodes;
             episodesReversed = false; // 默认正序
             modalContent.innerHTML = `
@@ -915,7 +856,6 @@ async function showDetails(id, vod_name, sourceCode) {
 
 
 function playVideo(url, vod_name, sourceCode, episodeIndex = 0) {
-
     if (window.isPasswordProtected && window.isPasswordVerified) {
         if (window.isPasswordProtected() && !window.isPasswordVerified()) {
             showPasswordModal && showPasswordModal();
@@ -927,13 +867,12 @@ function playVideo(url, vod_name, sourceCode, episodeIndex = 0) {
         return;
     }
     
-
     let sourceName = '';
     const modalTitle = document.getElementById('modalTitle');
     if (modalTitle) {
         const sourceSpan = modalTitle.querySelector('span.text-gray-400');
         if (sourceSpan) {
-        
+
             const sourceText = sourceSpan.textContent;
             const match = sourceText.match(/\(([^)]+)\)/);
             if (match && match[1]) {
@@ -942,14 +881,12 @@ function playVideo(url, vod_name, sourceCode, episodeIndex = 0) {
         }
     }
     
-
     const currentVideoTitle = vod_name;
     localStorage.setItem('currentVideoTitle', currentVideoTitle);
     localStorage.setItem('currentEpisodeIndex', episodeIndex);
     localStorage.setItem('currentEpisodes', JSON.stringify(currentEpisodes));
     localStorage.setItem('episodesReversed', episodesReversed);
     
-
     const videoTitle = vod_name || currentVideoTitle;
     const videoInfo = {
         title: videoTitle,
@@ -957,19 +894,16 @@ function playVideo(url, vod_name, sourceCode, episodeIndex = 0) {
         episodeIndex: episodeIndex,
         sourceName: sourceName,
         timestamp: Date.now(),
-    
+
         episodes: currentEpisodes && currentEpisodes.length > 0 ? [...currentEpisodes] : []
     };
     
-
     if (typeof addToViewingHistory === 'function') {
         addToViewingHistory(videoInfo);
     }
     
-
     const playerUrl = `player.html?url=${encodeURIComponent(url)}&title=${encodeURIComponent(videoTitle)}&index=${episodeIndex}&source=${encodeURIComponent(sourceName)}&source_code=${encodeURIComponent(sourceCode)}`;
     
-
     window.location.href = playerUrl;
 }
 
@@ -1001,7 +935,7 @@ function handlePlayerError() {
 function renderEpisodes(vodName, sourceCode) {
     const episodes = episodesReversed ? [...currentEpisodes].reverse() : currentEpisodes;
     return episodes.map((episode, index) => {
-    
+
         const realIndex = episodesReversed ? currentEpisodes.length - 1 - index : index;
         return `
             <button id="episode-${realIndex}" onclick="playVideo('${episode}','${vodName.replace(/"/g, '&quot;')}', '${sourceCode}', ${realIndex})" 
@@ -1015,13 +949,11 @@ function renderEpisodes(vodName, sourceCode) {
 
 function toggleEpisodeOrder(sourceCode) {
     episodesReversed = !episodesReversed;
-
     const episodesGrid = document.getElementById('episodesGrid');
     if (episodesGrid) {
         episodesGrid.innerHTML = renderEpisodes(currentVideoTitle, sourceCode);
     }
     
-
     const toggleBtn = document.querySelector(`button[onclick="toggleEpisodeOrder('${sourceCode}')"]`);
     if (toggleBtn) {
         toggleBtn.querySelector('span').textContent = episodesReversed ? '正序排列' : '倒序排列';
@@ -1036,13 +968,13 @@ function toggleEpisodeOrder(sourceCode) {
 async function importConfig() {
     showImportBox(async (file) => {
         try {
-        
+
             if (!(file.type === 'application/json' || file.name.endsWith('.json'))) throw '文件类型不正确';
 
-        
+
             if(file.size > 1024 * 1024 * 10) throw new Error('文件大小超过 10MB');
 
-        
+
             const content = await new Promise((resolve, reject) => {
                 const reader = new FileReader();
                 reader.onload = () => resolve(reader.result);
@@ -1050,15 +982,15 @@ async function importConfig() {
                 reader.readAsText(file);
             });
 
-        
+
             const config = JSON.parse(content);
             if (config.name !== 'TV233-Settings') throw '配置文件格式不正确';
 
-        
+
             const dataHash = await sha256(JSON.stringify(config.data));
             if (dataHash !== config.hash) throw '配置文件哈希值不匹配';
 
-        
+
             for (let item in config.data) {
                 localStorage.setItem(item, config.data[item]);
             }
@@ -1076,9 +1008,7 @@ async function importConfig() {
 
 
 async function exportConfig() {
-
     const config = {};
-
 
     const items = {};
     for (let i = 0; i < localStorage.length; i++) {
@@ -1088,28 +1018,23 @@ async function exportConfig() {
 
     const times = Date.now().toString();
     config['name'] = 'TV233-Settings';  // 配置文件名，用于校验
-    config['time'] = times;           
-    config['cfgVer'] = '1.0.0';       
-    config['data'] = items;           
+    config['time'] = times;   
+    config['cfgVer'] = '1.0.0';   
+    config['data'] = items;   
     config['hash'] = await sha256(JSON.stringify(config['data']));  // 计算数据的哈希值，用于校验
-
 
     saveStringAsFile(JSON.stringify(config), 'TV233-Settings_' + times + '.json');
 }
 
 
 function saveStringAsFile(content, fileName) {
-
     const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
-
     const url = window.URL.createObjectURL(blob);
-
     const a = document.createElement('a');
     a.href = url;
     a.download = fileName;
     document.body.appendChild(a);
     a.click();
-
     document.body.removeChild(a);
     window.URL.revokeObjectURL(url);
 }
