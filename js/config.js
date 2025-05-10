@@ -1,10 +1,10 @@
 // 全局常量配置
-const PROXY_URL = '/proxy/';
+const PROXY_URL = '/proxy/';    // 适用于 Cloudflare, Netlify (带重写), Vercel (带重写)
 const SEARCH_HISTORY_KEY = 'videoSearchHistory';
 const MAX_HISTORY_ITEMS = 5;
 
 const PASSWORD_CONFIG = {
-    localStorageKey: 'passwordVerified',
+    localStorageKey: 'passwordVerified',  // 存储验证状态的键名
     verificationTTL: 90 * 24 * 60 * 60 * 1000,  // 验证有效期（90天，约3个月）
 };
 
@@ -182,6 +182,7 @@ const SECURITY_CONFIG = {
     enableXSSProtection: true,  // 是否启用XSS保护
     sanitizeUrls: true,         // 是否清理URL
     maxQueryLength: 100,        // 最大搜索长度
+    // allowedApiDomains 不再需要，因为所有请求都通过内部代理
 };
 
 const CUSTOM_API_CONFIG = {

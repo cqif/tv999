@@ -45,6 +45,7 @@ let doubanPageStart = 0;
 const doubanPageSize = 16; // 一次显示的项目数量
 
 function initDouban() {
+    // 设置豆瓣开关的初始状态
     const doubanToggle = document.getElementById('doubanToggle');
     if (doubanToggle) {
         const isEnabled = localStorage.getItem('doubanEnabled') === 'true';
@@ -77,14 +78,19 @@ function initDouban() {
         window.scrollTo(0, 0);
     }
 
+    // 加载用户标签
     loadUserTags();
 
+    // 渲染电影/电视剧切换
     renderDoubanMovieTvSwitch();
     
+    // 渲染豆瓣标签
     renderDoubanTags();
     
+    // 换一批按钮事件监听
     setupDoubanRefreshBtn();
     
+    // 初始加载热门内容
     if (localStorage.getItem('doubanEnabled') === 'true') {
         renderRecommend(doubanCurrentTag, doubanPageSize, doubanPageStart);
     }
@@ -98,6 +104,7 @@ function updateDoubanVisibility() {
     const isSearching = document.getElementById('resultsArea') && 
         !document.getElementById('resultsArea').classList.contains('hidden');
     
+    // 只有在启用且没有搜索结果显示时才显示豆瓣区域
     if (isEnabled && !isSearching) {
         doubanArea.classList.remove('hidden');
         if (document.getElementById('douban-results').children.length === 0) {
@@ -111,6 +118,7 @@ function updateDoubanVisibility() {
 function fillSearchInput(title) {
     if (!title) return;
     
+    // 安全处理标题，防止XSS
     const safeTitle = title
         .replace(/</g, '&lt;')
         .replace(/>/g, '&gt;')
@@ -129,6 +137,7 @@ function fillSearchInput(title) {
 function fillAndSearch(title) {
     if (!title) return;
     
+    // 安全处理标题，防止XSS
     const safeTitle = title
         .replace(/</g, '&lt;')
         .replace(/>/g, '&gt;')
@@ -144,11 +153,13 @@ function fillAndSearch(title) {
 function fillAndSearchWithDouban(title) {
     if (!title) return;
     
+    // 安全处理标题，防止XSS
     const safeTitle = title
         .replace(/</g, '&lt;')
         .replace(/>/g, '&gt;')
         .replace(/"/g, '&quot;');
     
+    // 确保豆瓣资源API被选中
     if (typeof selectedAPIs !== 'undefined' && !selectedAPIs.includes('dbzy')) {
         const doubanCheckbox = document.querySelector('input[id="api_dbzy"]');
         if (doubanCheckbox) {
@@ -172,6 +183,7 @@ function fillAndSearchWithDouban(title) {
         }
     }
     
+    // 填充搜索框并执行搜索
     const input = document.getElementById('searchInput');
     if (input) {
         input.value = safeTitle;
@@ -180,6 +192,7 @@ function fillAndSearchWithDouban(title) {
 }
 
 function renderDoubanMovieTvSwitch() {
+    // 获取切换按钮元素
     const movieToggle = document.getElementById('douban-movie-toggle');
     const tvToggle = document.getElementById('douban-tv-toggle');
 
@@ -206,6 +219,7 @@ function renderDoubanMovieTvSwitch() {
         }
     });
     
+    // 电视剧按钮点击事件
     tvToggle.addEventListener('click', function() {
         if (doubanMovieTvCurrentSwitch !== 'tv') {
             tvToggle.classList.add('bg-pink-600', 'text-white');
@@ -232,10 +246,13 @@ function renderDoubanTags(tags) {
     const tagContainer = document.getElementById('douban-tags');
     if (!tagContainer) return;
     
+    // 确定当前应该使用的标签列表
     const currentTags = doubanMovieTvCurrentSwitch === 'movie' ? movieTags : tvTags;
     
+    // 清空标签容器
     tagContainer.innerHTML = '';
 
+    // 先添加标签管理按钮
     const manageBtn = document.createElement('button');
     manageBtn.className = 'py-1.5 px-3.5 rounded text-sm font-medium transition-all duration-300 bg-[#1a1a1a] text-gray-300 hover:bg-pink-700 hover:text-white';
     manageBtn.innerHTML = '<span class="flex items-center"><svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>管理标签</span>';
@@ -244,6 +261,7 @@ function renderDoubanTags(tags) {
     };
     tagContainer.appendChild(manageBtn);
 
+    // 添加所有标签
     currentTags.forEach(tag => {
         const btn = document.createElement('button');
         
@@ -272,6 +290,7 @@ function renderDoubanTags(tags) {
 }
 
 function setupDoubanRefreshBtn() {
+    // 修复ID，使用正确的ID douban-refresh 而不是 douban-refresh-btn
     const btn = document.getElementById('douban-refresh');
     if (!btn) return;
     
@@ -335,11 +354,13 @@ function renderRecommend(tag, pageLimit, pageStart) {
     `;
     loadingOverlay.appendChild(loadingContent);
 
+    // 冻结原有内容，并添加加载状态
     container.classList.add("relative");
     container.appendChild(loadingOverlay);
     
     const target = `https://movie.douban.com/j/search_subjects?type=${doubanMovieTvCurrentSwitch}&tag=${tag}&sort=recommend&page_limit=${pageLimit}&page_start=${pageStart}`;
     
+    // 使用通用请求函数
     fetchDoubanData(target)
         .then(data => {
             renderDoubanCards(data, container);
@@ -356,9 +377,11 @@ function renderRecommend(tag, pageLimit, pageStart) {
 }
 
 async function fetchDoubanData(url) {
+    // 添加超时控制
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 10000); // 10秒超时
     
+    // 设置请求选项，包括信号和头部
     const fetchOptions = {
         signal: controller.signal,
         headers: {
@@ -404,8 +427,10 @@ async function fetchDoubanData(url) {
 }
 
 function renderDoubanCards(data, container) {
+    // 创建文档片段以提高性能
     const fragment = document.createDocumentFragment();
     
+    // 如果没有数据
     if (!data.subjects || data.subjects.length === 0) {
         const emptyEl = document.createElement("div");
         emptyEl.className = "col-span-full text-center py-8";
@@ -460,6 +485,7 @@ function renderDoubanCards(data, container) {
         });
     }
     
+    // 清空并添加所有新元素
     container.innerHTML = "";
     container.appendChild(fragment);
 }
@@ -472,19 +498,23 @@ function resetToHome() {
 document.addEventListener('DOMContentLoaded', initDouban);
 
 function showTagManageModal() {
+    // 确保模态框在页面上只有一个实例
     let modal = document.getElementById('tagManageModal');
     if (modal) {
         document.body.removeChild(modal);
     }
     
+    // 创建模态框元素
     modal = document.createElement('div');
     modal.id = 'tagManageModal';
     modal.className = 'fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-40';
     
+    // 当前使用的标签类型和默认标签
     const isMovie = doubanMovieTvCurrentSwitch === 'movie';
     const currentTags = isMovie ? movieTags : tvTags;
     const defaultTags = isMovie ? defaultMovieTags : defaultTvTags;
     
+    // 模态框内容
     modal.innerHTML = `
         <div class="bg-[#191919] rounded-lg p-6 max-w-md w-full max-h-[90vh] overflow-y-auto relative">
             <button id="closeTagModal" class="absolute top-4 right-4 text-gray-400 hover:text-white text-xl">&times;</button>
@@ -529,27 +559,33 @@ function showTagManageModal() {
         </div>
     `;
     
+    // 添加模态框到页面
     document.body.appendChild(modal);
     
+    // 焦点放在输入框上
     setTimeout(() => {
         document.getElementById('newTagInput').focus();
     }, 100);
     
+    // 添加事件监听器 - 关闭按钮
     document.getElementById('closeTagModal').addEventListener('click', function() {
         document.body.removeChild(modal);
     });
     
+    // 添加事件监听器 - 点击模态框外部关闭
     modal.addEventListener('click', function(e) {
         if (e.target === modal) {
             document.body.removeChild(modal);
         }
     });
     
+    // 添加事件监听器 - 恢复默认标签按钮
     document.getElementById('resetTagsBtn').addEventListener('click', function() {
         resetTagsToDefault();
         showTagManageModal(); // 重新加载模态框
     });
     
+    // 添加事件监听器 - 删除标签按钮
     const deleteButtons = document.querySelectorAll('.delete-tag-btn');
     deleteButtons.forEach(btn => {
         btn.addEventListener('click', function() {
@@ -559,6 +595,7 @@ function showTagManageModal() {
         });
     });
     
+    // 添加事件监听器 - 表单提交
     document.getElementById('addTagForm').addEventListener('submit', function(e) {
         e.preventDefault();
         const input = document.getElementById('newTagInput');
@@ -573,14 +610,17 @@ function showTagManageModal() {
 }
 
 function addTag(tag) {
+    // 安全处理标签名，防止XSS
     const safeTag = tag
         .replace(/</g, '&lt;')
         .replace(/>/g, '&gt;')
         .replace(/"/g, '&quot;');
     
+    // 确定当前使用的是电影还是电视剧标签
     const isMovie = doubanMovieTvCurrentSwitch === 'movie';
     const currentTags = isMovie ? movieTags : tvTags;
     
+    // 检查是否已存在（忽略大小写）
     const exists = currentTags.some(
         existingTag => existingTag.toLowerCase() === safeTag.toLowerCase()
     );
@@ -590,30 +630,37 @@ function addTag(tag) {
         return;
     }
     
+    // 添加到对应的标签数组
     if (isMovie) {
         movieTags.push(safeTag);
     } else {
         tvTags.push(safeTag);
     }
     
+    // 保存到本地存储
     saveUserTags();
     
+    // 重新渲染标签
     renderDoubanTags();
     
     showToast('标签添加成功', 'success');
 }
 
 function deleteTag(tag) {
+    // 热门标签不能删除
     if (tag === '热门') {
         showToast('热门标签不能删除', 'warning');
         return;
     }
     
+    // 确定当前使用的是电影还是电视剧标签
     const isMovie = doubanMovieTvCurrentSwitch === 'movie';
     const currentTags = isMovie ? movieTags : tvTags;
     
+    // 寻找标签索引
     const index = currentTags.indexOf(tag);
     
+    // 如果找到标签，则删除
     if (index !== -1) {
         currentTags.splice(index, 1);
         
@@ -632,19 +679,24 @@ function deleteTag(tag) {
 }
 
 function resetTagsToDefault() {
+    // 确定当前使用的是电影还是电视剧
     const isMovie = doubanMovieTvCurrentSwitch === 'movie';
     
+    // 重置为默认标签
     if (isMovie) {
         movieTags = [...defaultMovieTags];
     } else {
         tvTags = [...defaultTvTags];
     }
     
+    // 设置当前标签为热门
     doubanCurrentTag = '热门';
     doubanPageStart = 0;
     
+    // 保存到本地存储
     saveUserTags();
     
+    // 重新渲染标签和内容
     renderDoubanTags();
     renderRecommend(doubanCurrentTag, doubanPageSize, doubanPageStart);
     

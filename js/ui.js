@@ -1,11 +1,13 @@
 // UI相关函数
 function toggleSettings(e) {
+    // 密码保护校验
     if (window.isPasswordProtected && window.isPasswordVerified) {
         if (window.isPasswordProtected() && !window.isPasswordVerified()) {
             showPasswordModal && showPasswordModal();
             return;
         }
     }
+    // 阻止事件冒泡，防止触发document的点击事件
     e && e.stopPropagation();
     const panel = document.getElementById('settingsPanel');
     panel.classList.toggle('show');
@@ -15,8 +17,10 @@ const toastQueue = [];
 let isShowingToast = false;
 
 function showToast(message, type = 'error') {
+    // 将新的toast添加到队列
     toastQueue.push({ message, type });
     
+    // 如果当前没有显示中的toast，则开始显示
     if (!isShowingToast) {
         showNextToast();
     }
@@ -45,9 +49,11 @@ function showNextToast() {
     toast.className = `fixed top-4 left-1/2 -translate-x-1/2 px-6 py-3 rounded-lg shadow-lg transform transition-all duration-300 ${bgColor} text-white z-50`;
     toastMessage.textContent = message;
     
+    // 显示提示
     toast.style.opacity = '1';
     toast.style.transform = 'translateX(-50%) translateY(0)';
     
+    // 3秒后自动隐藏
     setTimeout(() => {
         toast.style.opacity = '0';
         toast.style.transform = 'translateX(-50%) translateY(-100%)';
@@ -61,6 +67,7 @@ function showNextToast() {
 let loadingTimeoutId = null;
 
 function showLoading(message = '加载中...') {
+    // 清除任何现有的超时
     if (loadingTimeoutId) {
         clearTimeout(loadingTimeoutId);
     }
@@ -70,6 +77,7 @@ function showLoading(message = '加载中...') {
     messageEl.textContent = message;
     loading.style.display = 'flex';
     
+    // 设置30秒后自动关闭loading，防止无限loading
     loadingTimeoutId = setTimeout(() => {
         hideLoading();
         showToast('操作超时，请稍后重试', 'warning');
@@ -77,6 +85,7 @@ function showLoading(message = '加载中...') {
 }
 
 function hideLoading() {
+    // 清除超时
     if (loadingTimeoutId) {
         clearTimeout(loadingTimeoutId);
         loadingTimeoutId = null;
@@ -97,6 +106,7 @@ function updateSiteStatus(isAvailable) {
 
 function closeModal() {
     document.getElementById('modal').classList.add('hidden');
+    // 清除 iframe 内容
     document.getElementById('modalContent').innerHTML = '';
 }
 
@@ -124,25 +134,31 @@ function getSearchHistory() {
 function saveSearchHistory(query) {
     if (!query || !query.trim()) return;
     
+    // 清理输入，防止XSS
     query = query.trim().substring(0, 50).replace(/</g, '&lt;').replace(/>/g, '&gt;');
     
     let history = getSearchHistory();
     
+    // 获取当前时间
     const now = Date.now();
     
+    // 过滤掉超过2个月的记录（约60天，60*24*60*60*1000 = 5184000000毫秒）
     history = history.filter(item => 
         typeof item === 'object' && item.timestamp && (now - item.timestamp < 5184000000)
     );
     
+    // 删除已存在的相同项
     history = history.filter(item => 
         typeof item === 'object' ? item.text !== query : item !== query
     );
     
+    // 新项添加到开头，包含时间戳
     history.unshift({
         text: query,
         timestamp: now
     });
     
+    // 限制历史记录数量
     if (history.length > MAX_HISTORY_ITEMS) {
         history = history.slice(0, MAX_HISTORY_ITEMS);
     }
@@ -173,6 +189,7 @@ function renderSearchHistory() {
         return;
     }
     
+    // 创建一个包含标题和清除按钮的行
     historyContainer.innerHTML = `
         <div class="flex justify-between items-center w-full mb-2">
             <div class="text-gray-500">最近搜索:</div>
@@ -202,6 +219,7 @@ function renderSearchHistory() {
 }
 
 function clearSearchHistory() {
+    // 密码保护校验
     if (window.isPasswordProtected && window.isPasswordVerified) {
         if (window.isPasswordProtected() && !window.isPasswordVerified()) {
             showPasswordModal && showPasswordModal();
@@ -219,6 +237,7 @@ function clearSearchHistory() {
 }
 
 function toggleHistory(e) {
+    // 密码保护校验
     if (window.isPasswordProtected && window.isPasswordVerified) {
         if (window.isPasswordProtected() && !window.isPasswordVerified()) {
             showPasswordModal && showPasswordModal();
@@ -247,21 +266,25 @@ function formatTimestamp(timestamp) {
     const now = new Date();
     const diff = now - date;
     
+    // 小于1小时，显示"X分钟前"
     if (diff < 3600000) {
         const minutes = Math.floor(diff / 60000);
         return minutes <= 0 ? '刚刚' : `${minutes}分钟前`;
     }
     
+    // 小于24小时，显示"X小时前"
     if (diff < 86400000) {
         const hours = Math.floor(diff / 3600000);
         return `${hours}小时前`;
     }
     
+    // 小于7天，显示"X天前"
     if (diff < 604800000) {
         const days = Math.floor(diff / 86400000);
         return `${days}天前`;
     }
     
+    // 其他情况，显示完整日期
     const year = date.getFullYear();
     const month = (date.getMonth() + 1).toString().padStart(2, '0');
     const day = date.getDate().toString().padStart(2, '0');
@@ -292,6 +315,7 @@ function loadViewingHistory() {
         return;
     }
     
+    // 渲染历史记录
     historyList.innerHTML = history.map(item => {
         const safeTitle = item.title
             .replace(/</g, '&lt;')
@@ -346,6 +370,7 @@ function loadViewingHistory() {
         `;
     }).join('');
     
+    // 检查是否存在较多历史记录，添加底部边距确保底部按钮不会挡住内容
     if (history.length > 5) {
         historyList.classList.add('pb-4');
     }
@@ -433,6 +458,7 @@ function playFromHistory(url, title, episodeIndex, playbackPosition = 0) {
 }
 
 function addToViewingHistory(videoInfo) {
+    // 密码保护校验
     if (window.isPasswordProtected && window.isPasswordVerified) {
         if (window.isPasswordProtected() && !window.isPasswordVerified()) {
             showPasswordModal && showPasswordModal();
@@ -514,8 +540,10 @@ const originalToggleSettings = toggleSettings;
 toggleSettings = function(e) {
     if (e) e.stopPropagation();
     
+    // 原始设置面板切换逻辑
     originalToggleSettings(e);
     
+    // 如果历史记录面板是打开的，则关闭它
     const historyPanel = document.getElementById('historyPanel');
     if (historyPanel && historyPanel.classList.contains('show')) {
         historyPanel.classList.remove('show');
@@ -537,11 +565,13 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function clearLocalStorage() {
+    // 确保模态框在页面上只有一个实例
     let modal = document.getElementById('messageBoxModal');
     if (modal) {
         document.body.removeChild(modal);
     }
 
+    // 创建模态框元素
     modal = document.createElement('div');
     modal.id = 'messageBoxModal';
     modal.className = 'fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-40';
@@ -562,12 +592,15 @@ function clearLocalStorage() {
             </div>
         </div>`;
 
+    // 添加模态框到页面
     document.body.appendChild(modal);
 
+    // 添加事件监听器 - 关闭按钮
     document.getElementById('closeBoxModal').addEventListener('click', function () {
         document.body.removeChild(modal);
     });
 
+    // 添加事件监听器 - 确定按钮
     document.getElementById('confirmBoxModal').addEventListener('click', function () {
         localStorage.clear();
         modal.innerHTML = `
@@ -585,10 +618,12 @@ function clearLocalStorage() {
         }, 3000);
     });
 
+    // 添加事件监听器 - 取消按钮
     document.getElementById('cancelBoxModal').addEventListener('click', function () {
         document.body.removeChild(modal);
     });
 
+    // 添加事件监听器 - 点击模态框外部关闭
     modal.addEventListener('click', function (e) {
         if (e.target === modal) {
             document.body.removeChild(modal);
@@ -597,11 +632,13 @@ function clearLocalStorage() {
 }
 
 function showImportBox(fun) {
+    // 确保模态框在页面上只有一个实例
     let modal = document.getElementById('showImportBoxModal');
     if (modal) {
         document.body.removeChild(modal);
     }
 
+    // 创建模态框元素
     modal = document.createElement('div');
     modal.id = 'showImportBoxModal';
     modal.className = 'fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-40';
@@ -632,18 +669,22 @@ function showImportBox(fun) {
             </div>
         </div>`;
 
+    // 添加模态框到页面
     document.body.appendChild(modal);
 
+    // 添加事件监听器 - 关闭按钮
     document.getElementById('closeBoxModal').addEventListener('click', function () {
         document.body.removeChild(modal);
     });
 
+    // 添加事件监听器 - 点击模态框外部关闭
     modal.addEventListener('click', function (e) {
         if (e.target === modal) {
             document.body.removeChild(modal);
         }
     });
 
+    // 添加事件监听器 - 拖拽文件
     const dropZone = document.getElementById('dropZone');
     const fileInput = document.getElementById('ChooseFile');
 
