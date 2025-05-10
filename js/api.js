@@ -1,1 +1,613 @@
-async function handleApiRequest(_0x4054ae){const _0x443ed6=_0x4054ae['searchParams']['get']('customApi')||'';const _0x28ae6d=_0x4054ae['searchParams']['get']('source')||'heimuer';try{if(_0x4054ae['pathname']==='/api/search'){const _0x286cad=_0x4054ae['searchParams']['get']('wd');if(!_0x286cad){throw new Error('缺少搜索参数');}if(_0x28ae6d==='custom'&&!_0x443ed6){throw new Error('使用自定义API时必须提供API地址');}if(!API_SITES[_0x28ae6d]&&_0x28ae6d!=='custom'){throw new Error('无效的API来源');}const _0x2914d7=_0x443ed6?''+_0x443ed6+API_CONFIG['search']['path']+encodeURIComponent(_0x286cad):''+API_SITES[_0x28ae6d]['api']+API_CONFIG['search']['path']+encodeURIComponent(_0x286cad);const _0x397921=new AbortController();const _0x33dcb1=setTimeout(()=>_0x397921['abort'](),0x2710);try{const _0x45290a=await fetch(PROXY_URL+encodeURIComponent(_0x2914d7),{'headers':API_CONFIG['search']['headers'],'signal':_0x397921['signal']});clearTimeout(_0x33dcb1);if(!_0x45290a['ok']){throw new Error('API请求失败:\x20'+_0x45290a['status']);}const _0x40276d=await _0x45290a['json']();if(!_0x40276d||!Array['isArray'](_0x40276d['list'])){throw new Error('API返回的数据格式无效');}_0x40276d['list']['forEach'](_0xf25ced=>{_0xf25ced['source_name']=_0x28ae6d==='custom'?'自定义源':API_SITES[_0x28ae6d]['name'];_0xf25ced['source_code']=_0x28ae6d;if(_0x28ae6d==='custom'){_0xf25ced['api_url']=_0x443ed6;}});return JSON['stringify']({'code':0xc8,'list':_0x40276d['list']||[]});}catch(_0x208fd3){clearTimeout(_0x33dcb1);throw _0x208fd3;}}if(_0x4054ae['pathname']==='/api/detail'){const _0x268c5d=_0x4054ae['searchParams']['get']('id');const _0x4a0f7f=_0x4054ae['searchParams']['get']('source')||'heimuer';if(!_0x268c5d){throw new Error('缺少视频ID参数');}if(!/^[\w-]+$/['test'](_0x268c5d)){throw new Error('无效的视频ID格式');}if(_0x4a0f7f==='custom'&&!_0x443ed6){throw new Error('使用自定义API时必须提供API地址');}if(!API_SITES[_0x4a0f7f]&&_0x4a0f7f!=='custom'){throw new Error('无效的API来源');}if((_0x4a0f7f==='ffzy'||_0x4a0f7f==='jisu'||_0x4a0f7f==='huangcang')&&API_SITES[_0x4a0f7f]['detail']){return await handleSpecialSourceDetail(_0x268c5d,_0x4a0f7f);}if(_0x4a0f7f==='custom'&&_0x4054ae['searchParams']['get']('useDetail')==='true'){return await handleCustomApiSpecialDetail(_0x268c5d,_0x443ed6);}const _0xc0c468=_0x443ed6?''+_0x443ed6+API_CONFIG['detail']['path']+_0x268c5d:''+API_SITES[_0x4a0f7f]['api']+API_CONFIG['detail']['path']+_0x268c5d;const _0xf5c857=new AbortController();const _0xbef5eb=setTimeout(()=>_0xf5c857['abort'](),0x2710);try{const _0xe7efd6=await fetch(PROXY_URL+encodeURIComponent(_0xc0c468),{'headers':API_CONFIG['detail']['headers'],'signal':_0xf5c857['signal']});clearTimeout(_0xbef5eb);if(!_0xe7efd6['ok']){throw new Error('详情请求失败:\x20'+_0xe7efd6['status']);}const _0x1b51f3=await _0xe7efd6['json']();if(!_0x1b51f3||!_0x1b51f3['list']||!Array['isArray'](_0x1b51f3['list'])||_0x1b51f3['list']['length']===0x0){throw new Error('获取到的详情内容无效');}const _0x1dc98e=_0x1b51f3['list'][0x0];let _0x5cd300=[];if(_0x1dc98e['vod_play_url']){const _0x1aca4d=_0x1dc98e['vod_play_url']['split']('$$$');if(_0x1aca4d['length']>0x0){const _0x301eda=_0x1aca4d[0x0];const _0x4aff47=_0x301eda['split']('#');_0x5cd300=_0x4aff47['map'](_0x1ebbfe=>{const _0x5cbf2a=_0x1ebbfe['split']('$');return _0x5cbf2a['length']>0x1?_0x5cbf2a[0x1]:'';})['filter'](_0x46c655=>_0x46c655&&(_0x46c655['startsWith']('http://')||_0x46c655['startsWith']('https://')));}}if(_0x5cd300['length']===0x0&&_0x1dc98e['vod_content']){const _0x1dba70=_0x1dc98e['vod_content']['match'](M3U8_PATTERN)||[];_0x5cd300=_0x1dba70['map'](_0x773a54=>_0x773a54['replace'](/^\$/,''));}return JSON['stringify']({'code':0xc8,'episodes':_0x5cd300,'detailUrl':_0xc0c468,'videoInfo':{'title':_0x1dc98e['vod_name'],'cover':_0x1dc98e['vod_pic'],'desc':_0x1dc98e['vod_content'],'type':_0x1dc98e['type_name'],'year':_0x1dc98e['vod_year'],'area':_0x1dc98e['vod_area'],'director':_0x1dc98e['vod_director'],'actor':_0x1dc98e['vod_actor'],'remarks':_0x1dc98e['vod_remarks'],'source_name':_0x4a0f7f==='custom'?'自定义源':API_SITES[_0x4a0f7f]['name'],'source_code':_0x4a0f7f}});}catch(_0xea0d8e){clearTimeout(_0xbef5eb);throw _0xea0d8e;}}throw new Error('未知的API路径');}catch(_0x463e69){console['error']('API处理错误:',_0x463e69);return JSON['stringify']({'code':0x190,'msg':_0x463e69['message']||'请求处理失败','list':[],'episodes':[]});}}async function handleCustomApiSpecialDetail(_0x367eaf,_0x3c2e9b){try{const _0x54a0c3=_0x3c2e9b+'/index.php/vod/detail/id/'+_0x367eaf+'.html';const _0x57de75=new AbortController();const _0x29c49c=setTimeout(()=>_0x57de75['abort'](),0x2710);const _0x53692e=await fetch(PROXY_URL+encodeURIComponent(_0x54a0c3),{'headers':{'User-Agent':'Mozilla/5.0\x20(Windows\x20NT\x2010.0;\x20Win64;\x20x64)\x20AppleWebKit/537.36\x20(KHTML,\x20like\x20Gecko)\x20Chrome/122.0.0.0\x20Safari/537.36'},'signal':_0x57de75['signal']});clearTimeout(_0x29c49c);if(!_0x53692e['ok']){throw new Error('自定义API详情页请求失败:\x20'+_0x53692e['status']);}const _0x3bfc2f=await _0x53692e['text']();const _0x7dde7d=/\$(https?:\/\/[^"'\s]+?\.m3u8)/g;let _0x187bbc=_0x3bfc2f['match'](_0x7dde7d)||[];_0x187bbc=_0x187bbc['map'](_0x4b4672=>{_0x4b4672=_0x4b4672['substring'](0x1,_0x4b4672['length']);const _0x1c074f=_0x4b4672['indexOf']('(');return _0x1c074f>0x0?_0x4b4672['substring'](0x0,_0x1c074f):_0x4b4672;});const _0x1840ed=_0x3bfc2f['match'](/<h1[^>]*>([^<]+)<\/h1>/);const _0x3b35fe=_0x1840ed?_0x1840ed[0x1]['trim']():'';const _0x2a4447=_0x3bfc2f['match'](/<div[^>]*class=["']sketch["'][^>]*>([\s\S]*?)<\/div>/);const _0x1c1506=_0x2a4447?_0x2a4447[0x1]['replace'](/<[^>]+>/g,'\x20')['trim']():'';return JSON['stringify']({'code':0xc8,'episodes':_0x187bbc,'detailUrl':_0x54a0c3,'videoInfo':{'title':_0x3b35fe,'desc':_0x1c1506,'source_name':'自定义源','source_code':'custom'}});}catch(_0x4f229a){console['error']('自定义API详情获取失败:',_0x4f229a);throw _0x4f229a;}}async function handleJisuDetail(_0x3a8555,_0x169a4e){return await handleSpecialSourceDetail(_0x3a8555,_0x169a4e);}async function handleFFZYDetail(_0x475ede,_0xac53c4){return await handleSpecialSourceDetail(_0x475ede,_0xac53c4);}async function handleSpecialSourceDetail(_0x21895d,_0x51decd){try{const _0x5b245f=API_SITES[_0x51decd]['detail']+'/index.php/vod/detail/id/'+_0x21895d+'.html';const _0x53aa10=new AbortController();const _0x2286cd=setTimeout(()=>_0x53aa10['abort'](),0x2710);const _0x34176e=await fetch(PROXY_URL+encodeURIComponent(_0x5b245f),{'headers':{'User-Agent':'Mozilla/5.0\x20(Windows\x20NT\x2010.0;\x20Win64;\x20x64)\x20AppleWebKit/537.36\x20(KHTML,\x20like\x20Gecko)\x20Chrome/122.0.0.0\x20Safari/537.36'},'signal':_0x53aa10['signal']});clearTimeout(_0x2286cd);if(!_0x34176e['ok']){throw new Error('详情页请求失败:\x20'+_0x34176e['status']);}const _0xcdd710=await _0x34176e['text']();let _0x55f912=[];if(_0x51decd==='ffzy'){const _0x14a360=/\$(https?:\/\/[^"'\s]+?\/\d{8}\/\d+_[a-f0-9]+\/index\.m3u8)/g;_0x55f912=_0xcdd710['match'](_0x14a360)||[];}if(_0x55f912['length']===0x0){const _0xcd7136=/\$(https?:\/\/[^"'\s]+?\.m3u8)/g;_0x55f912=_0xcdd710['match'](_0xcd7136)||[];}_0x55f912=[...new Set(_0x55f912)];_0x55f912=_0x55f912['map'](_0x488562=>{_0x488562=_0x488562['substring'](0x1,_0x488562['length']);const _0x3da050=_0x488562['indexOf']('(');return _0x3da050>0x0?_0x488562['substring'](0x0,_0x3da050):_0x488562;});const _0x1d6b8f=_0xcdd710['match'](/<h1[^>]*>([^<]+)<\/h1>/);const _0xcaacf5=_0x1d6b8f?_0x1d6b8f[0x1]['trim']():'';const _0x220e33=_0xcdd710['match'](/<div[^>]*class=["']sketch["'][^>]*>([\s\S]*?)<\/div>/);const _0x48737b=_0x220e33?_0x220e33[0x1]['replace'](/<[^>]+>/g,'\x20')['trim']():'';return JSON['stringify']({'code':0xc8,'episodes':_0x55f912,'detailUrl':_0x5b245f,'videoInfo':{'title':_0xcaacf5,'desc':_0x48737b,'source_name':API_SITES[_0x51decd]['name'],'source_code':_0x51decd}});}catch(_0x21c002){console['error'](API_SITES[_0x51decd]['name']+'详情获取失败:',_0x21c002);throw _0x21c002;}}async function handleAggregatedSearch(_0x82a8b7){const _0x58f924=Object['keys'](API_SITES)['filter'](_0x29f250=>_0x29f250!=='aggregated'&&_0x29f250!=='custom');if(_0x58f924['length']===0x0){throw new Error('没有可用的API源');}const _0x580594=_0x58f924['map'](async _0x417ac2=>{try{const _0x34023d=''+API_SITES[_0x417ac2]['api']+API_CONFIG['search']['path']+encodeURIComponent(_0x82a8b7);const _0x202ecb=new Promise((_0x119c65,_0x42c327)=>setTimeout(()=>_0x42c327(new Error(_0x417ac2+'源搜索超时')),0x1f40));const _0x584d1b=fetch(PROXY_URL+encodeURIComponent(_0x34023d),{'headers':API_CONFIG['search']['headers']});const _0xaa5903=await Promise['race']([_0x584d1b,_0x202ecb]);if(!_0xaa5903['ok']){throw new Error(_0x417ac2+'源请求失败:\x20'+_0xaa5903['status']);}const _0x5eac99=await _0xaa5903['json']();if(!_0x5eac99||!Array['isArray'](_0x5eac99['list'])){throw new Error(_0x417ac2+'源返回的数据格式无效');}const _0x9fb867=_0x5eac99['list']['map'](_0x24c1c9=>({..._0x24c1c9,'source_name':API_SITES[_0x417ac2]['name'],'source_code':_0x417ac2}));return _0x9fb867;}catch(_0x3f9636){console['warn'](_0x417ac2+'源搜索失败:',_0x3f9636);return[];}});try{const _0x40965b=await Promise['all'](_0x580594);let _0x2f2342=[];_0x40965b['forEach'](_0x455bec=>{if(Array['isArray'](_0x455bec)&&_0x455bec['length']>0x0){_0x2f2342=_0x2f2342['concat'](_0x455bec);}});if(_0x2f2342['length']===0x0){return JSON['stringify']({'code':0xc8,'list':[],'msg':'所有源均无搜索结果'});}const _0x4875e8=[];const _0x34d8a4=new Set();_0x2f2342['forEach'](_0x286b0f=>{const _0x3aa69b=_0x286b0f['source_code']+'_'+_0x286b0f['vod_id'];if(!_0x34d8a4['has'](_0x3aa69b)){_0x34d8a4['add'](_0x3aa69b);_0x4875e8['push'](_0x286b0f);}});_0x4875e8['sort']((_0x8050ea,_0x411877)=>{const _0xb6aa64=(_0x8050ea['vod_name']||'')['localeCompare'](_0x411877['vod_name']||'');if(_0xb6aa64!==0x0)return _0xb6aa64;return(_0x8050ea['source_name']||'')['localeCompare'](_0x411877['source_name']||'');});return JSON['stringify']({'code':0xc8,'list':_0x4875e8});}catch(_0xe8e891){console['error']('聚合搜索处理错误:',_0xe8e891);return JSON['stringify']({'code':0x190,'msg':'聚合搜索处理失败:\x20'+_0xe8e891['message'],'list':[]});}}async function handleMultipleCustomSearch(_0x4963b3,_0x210e03){const _0x5568e6=_0x210e03['split'](CUSTOM_API_CONFIG['separator'])['map'](_0x130849=>_0x130849['trim']())['filter'](_0x1ea5ce=>_0x1ea5ce['length']>0x0&&/^https?:\/\//['test'](_0x1ea5ce))['slice'](0x0,CUSTOM_API_CONFIG['maxSources']);if(_0x5568e6['length']===0x0){throw new Error('没有提供有效的自定义API地址');}const _0x22ce95=_0x5568e6['map'](async(_0x41f6ca,_0xb7cd6d)=>{try{const _0x566293=''+_0x41f6ca+API_CONFIG['search']['path']+encodeURIComponent(_0x4963b3);const _0x3375df=new Promise((_0x18fab9,_0x1d0049)=>setTimeout(()=>_0x1d0049(new Error('自定义API\x20'+(_0xb7cd6d+0x1)+'\x20搜索超时')),0x1f40));const _0x20ed68=fetch(PROXY_URL+encodeURIComponent(_0x566293),{'headers':API_CONFIG['search']['headers']});const _0x480256=await Promise['race']([_0x20ed68,_0x3375df]);if(!_0x480256['ok']){throw new Error('自定义API\x20'+(_0xb7cd6d+0x1)+'\x20请求失败:\x20'+_0x480256['status']);}const _0x564e5e=await _0x480256['json']();if(!_0x564e5e||!Array['isArray'](_0x564e5e['list'])){throw new Error('自定义API\x20'+(_0xb7cd6d+0x1)+'\x20返回的数据格式无效');}const _0x5c29af=_0x564e5e['list']['map'](_0x3e5988=>({..._0x3e5988,'source_name':''+CUSTOM_API_CONFIG['namePrefix']+(_0xb7cd6d+0x1),'source_code':'custom','api_url':_0x41f6ca}));return _0x5c29af;}catch(_0x45aea2){console['warn']('自定义API\x20'+(_0xb7cd6d+0x1)+'\x20搜索失败:',_0x45aea2);return[];}});try{const _0x5953eb=await Promise['all'](_0x22ce95);let _0x2b8fff=[];_0x5953eb['forEach'](_0x2bd3b4=>{if(Array['isArray'](_0x2bd3b4)&&_0x2bd3b4['length']>0x0){_0x2b8fff=_0x2b8fff['concat'](_0x2bd3b4);}});if(_0x2b8fff['length']===0x0){return JSON['stringify']({'code':0xc8,'list':[],'msg':'所有自定义API源均无搜索结果'});}const _0x3f8455=[];const _0x571467=new Set();_0x2b8fff['forEach'](_0x31c0df=>{const _0x277108=(_0x31c0df['api_url']||'')+'_'+_0x31c0df['vod_id'];if(!_0x571467['has'](_0x277108)){_0x571467['add'](_0x277108);_0x3f8455['push'](_0x31c0df);}});return JSON['stringify']({'code':0xc8,'list':_0x3f8455});}catch(_0x1403c5){console['error']('自定义API聚合搜索处理错误:',_0x1403c5);return JSON['stringify']({'code':0x190,'msg':'自定义API聚合搜索处理失败:\x20'+_0x1403c5['message'],'list':[]});}}(function(){const _0x3018f5=window['fetch'];window['fetch']=async function(_0x23d8bc,_0x4d8c43){const _0x2a669d=typeof _0x23d8bc==='string'?new URL(_0x23d8bc,window['location']['origin']):_0x23d8bc['url'];if(_0x2a669d['pathname']['startsWith']('/api/')){if(window['isPasswordProtected']&&window['isPasswordVerified']){if(window['isPasswordProtected']()&&!window['isPasswordVerified']()){return;}}try{const _0x320e49=await handleApiRequest(_0x2a669d);return new Response(_0x320e49,{'headers':{'Content-Type':'application/json','Access-Control-Allow-Origin':'*'}});}catch(_0xf710d3){return new Response(JSON['stringify']({'code':0x1f4,'msg':'服务器内部错误'}),{'status':0x1f4,'headers':{'Content-Type':'application/json'}});}}return _0x3018f5['apply'](this,arguments);};}());async function testSiteAvailability(_0x202268){try{const _0x5b3f5f=await fetch('/api/search?wd=test&customApi='+encodeURIComponent(_0x202268),{'signal':AbortSignal['timeout'](0x1388)});if(!_0x5b3f5f['ok']){return![];}const _0x504143=await _0x5b3f5f['json']();return _0x504143&&_0x504143['code']!==0x190&&Array['isArray'](_0x504143['list']);}catch(_0x46d0be){console['error']('站点可用性测试失败:',_0x46d0be);return![];}}
+
+async function handleApiRequest(url) {
+    const customApi = url.searchParams.get('customApi') || '';
+    const source = url.searchParams.get('source') || 'heimuer';
+    
+    try {
+        if (url.pathname === '/api/search') {
+            const searchQuery = url.searchParams.get('wd');
+            if (!searchQuery) {
+                throw new Error('缺少搜索参数');
+            }
+            
+        
+            if (source === 'custom' && !customApi) {
+                throw new Error('使用自定义API时必须提供API地址');
+            }
+            
+            if (!API_SITES[source] && source !== 'custom') {
+                throw new Error('无效的API来源');
+            }
+            
+            const apiUrl = customApi
+                ? `${customApi}${API_CONFIG.search.path}${encodeURIComponent(searchQuery)}`
+                : `${API_SITES[source].api}${API_CONFIG.search.path}${encodeURIComponent(searchQuery)}`;
+            
+        
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 10000);
+            
+            try {
+                const response = await fetch(PROXY_URL + encodeURIComponent(apiUrl), {
+                    headers: API_CONFIG.search.headers,
+                    signal: controller.signal
+                });
+                
+                clearTimeout(timeoutId);
+                
+                if (!response.ok) {
+                    throw new Error(`API请求失败: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                
+            
+                if (!data || !Array.isArray(data.list)) {
+                    throw new Error('API返回的数据格式无效');
+                }
+                
+            
+                data.list.forEach(item => {
+                    item.source_name = source === 'custom' ? '自定义源' : API_SITES[source].name;
+                    item.source_code = source;
+                
+                    if (source === 'custom') {
+                        item.api_url = customApi;
+                    }
+                });
+                
+                return JSON.stringify({
+                    code: 200,
+                    list: data.list || [],
+                });
+            } catch (fetchError) {
+                clearTimeout(timeoutId);
+                throw fetchError;
+            }
+        }
+
+    
+        if (url.pathname === '/api/detail') {
+            const id = url.searchParams.get('id');
+            const sourceCode = url.searchParams.get('source') || 'heimuer'; // 获取源代码
+            
+            if (!id) {
+                throw new Error('缺少视频ID参数');
+            }
+            
+        
+            if (!/^[\w-]+$/.test(id)) {
+                throw new Error('无效的视频ID格式');
+            }
+
+        
+            if (sourceCode === 'custom' && !customApi) {
+                throw new Error('使用自定义API时必须提供API地址');
+            }
+            
+            if (!API_SITES[sourceCode] && sourceCode !== 'custom') {
+                throw new Error('无效的API来源');
+            }
+
+        
+            if ((sourceCode === 'ffzy' || sourceCode === 'jisu' || sourceCode === 'huangcang') && API_SITES[sourceCode].detail) {
+                return await handleSpecialSourceDetail(id, sourceCode);
+            }
+            
+        
+            if (sourceCode === 'custom' && url.searchParams.get('useDetail') === 'true') {
+                return await handleCustomApiSpecialDetail(id, customApi);
+            }
+            
+            const detailUrl = customApi
+                ? `${customApi}${API_CONFIG.detail.path}${id}`
+                : `${API_SITES[sourceCode].api}${API_CONFIG.detail.path}${id}`;
+            
+        
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 10000);
+            
+            try {
+                const response = await fetch(PROXY_URL + encodeURIComponent(detailUrl), {
+                    headers: API_CONFIG.detail.headers,
+                    signal: controller.signal
+                });
+                
+                clearTimeout(timeoutId);
+                
+                if (!response.ok) {
+                    throw new Error(`详情请求失败: ${response.status}`);
+                }
+                
+            
+                const data = await response.json();
+                
+            
+                if (!data || !data.list || !Array.isArray(data.list) || data.list.length === 0) {
+                    throw new Error('获取到的详情内容无效');
+                }
+                
+            
+                const videoDetail = data.list[0];
+                
+            
+                let episodes = [];
+                
+                if (videoDetail.vod_play_url) {
+                
+                    const playSources = videoDetail.vod_play_url.split('$$$');
+                    
+                
+                    if (playSources.length > 0) {
+                        const mainSource = playSources[0];
+                        const episodeList = mainSource.split('#');
+                        
+                    
+                        episodes = episodeList.map(ep => {
+                            const parts = ep.split('$');
+                        
+                            return parts.length > 1 ? parts[1] : '';
+                        }).filter(url => url && (url.startsWith('http://') || url.startsWith('https://')));
+                    }
+                }
+                
+            
+                if (episodes.length === 0 && videoDetail.vod_content) {
+                    const matches = videoDetail.vod_content.match(M3U8_PATTERN) || [];
+                    episodes = matches.map(link => link.replace(/^\$/, ''));
+                }
+                
+                return JSON.stringify({
+                    code: 200,
+                    episodes: episodes,
+                    detailUrl: detailUrl,
+                    videoInfo: {
+                        title: videoDetail.vod_name,
+                        cover: videoDetail.vod_pic,
+                        desc: videoDetail.vod_content,
+                        type: videoDetail.type_name,
+                        year: videoDetail.vod_year,
+                        area: videoDetail.vod_area,
+                        director: videoDetail.vod_director,
+                        actor: videoDetail.vod_actor,
+                        remarks: videoDetail.vod_remarks,
+                    
+                        source_name: sourceCode === 'custom' ? '自定义源' : API_SITES[sourceCode].name,
+                        source_code: sourceCode
+                    }
+                });
+            } catch (fetchError) {
+                clearTimeout(timeoutId);
+                throw fetchError;
+            }
+        }
+
+        throw new Error('未知的API路径');
+    } catch (error) {
+        console.error('API处理错误:', error);
+        return JSON.stringify({
+            code: 400,
+            msg: error.message || '请求处理失败',
+            list: [],
+            episodes: [],
+        });
+    }
+}
+
+
+async function handleCustomApiSpecialDetail(id, customApi) {
+    try {
+    
+        const detailUrl = `${customApi}/index.php/vod/detail/id/${id}.html`;
+        
+    
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 10000);
+        
+    
+        const response = await fetch(PROXY_URL + encodeURIComponent(detailUrl), {
+            headers: {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
+            },
+            signal: controller.signal
+        });
+        
+        clearTimeout(timeoutId);
+        
+        if (!response.ok) {
+            throw new Error(`自定义API详情页请求失败: ${response.status}`);
+        }
+        
+    
+        const html = await response.text();
+        
+    
+        const generalPattern = /\$(https?:\/\/[^"'\s]+?\.m3u8)/g;
+        let matches = html.match(generalPattern) || [];
+        
+    
+        matches = matches.map(link => {
+            link = link.substring(1, link.length);
+            const parenIndex = link.indexOf('(');
+            return parenIndex > 0 ? link.substring(0, parenIndex) : link;
+        });
+        
+    
+        const titleMatch = html.match(/<h1[^>]*>([^<]+)<\/h1>/);
+        const titleText = titleMatch ? titleMatch[1].trim() : '';
+        
+        const descMatch = html.match(/<div[^>]*class=["']sketch["'][^>]*>([\s\S]*?)<\/div>/);
+        const descText = descMatch ? descMatch[1].replace(/<[^>]+>/g, ' ').trim() : '';
+        
+        return JSON.stringify({
+            code: 200,
+            episodes: matches,
+            detailUrl: detailUrl,
+            videoInfo: {
+                title: titleText,
+                desc: descText,
+                source_name: '自定义源',
+                source_code: 'custom'
+            }
+        });
+    } catch (error) {
+        console.error(`自定义API详情获取失败:`, error);
+        throw error;
+    }
+}
+
+
+async function handleJisuDetail(id, sourceCode) {
+
+    return await handleSpecialSourceDetail(id, sourceCode);
+}
+
+
+async function handleFFZYDetail(id, sourceCode) {
+
+    return await handleSpecialSourceDetail(id, sourceCode);
+}
+
+
+async function handleSpecialSourceDetail(id, sourceCode) {
+    try {
+    
+        const detailUrl = `${API_SITES[sourceCode].detail}/index.php/vod/detail/id/${id}.html`;
+        
+    
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 10000);
+        
+    
+        const response = await fetch(PROXY_URL + encodeURIComponent(detailUrl), {
+            headers: {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
+            },
+            signal: controller.signal
+        });
+        
+        clearTimeout(timeoutId);
+        
+        if (!response.ok) {
+            throw new Error(`详情页请求失败: ${response.status}`);
+        }
+        
+    
+        const html = await response.text();
+        
+    
+        let matches = [];
+        
+        if (sourceCode === 'ffzy') {
+        
+            const ffzyPattern = /\$(https?:\/\/[^"'\s]+?\/\d{8}\/\d+_[a-f0-9]+\/index\.m3u8)/g;
+            matches = html.match(ffzyPattern) || [];
+        }
+        
+    
+        if (matches.length === 0) {
+            const generalPattern = /\$(https?:\/\/[^"'\s]+?\.m3u8)/g;
+            matches = html.match(generalPattern) || [];
+        }
+    
+        matches = [...new Set(matches)];
+    
+        matches = matches.map(link => {
+            link = link.substring(1, link.length);
+            const parenIndex = link.indexOf('(');
+            return parenIndex > 0 ? link.substring(0, parenIndex) : link;
+        });
+        
+    
+        const titleMatch = html.match(/<h1[^>]*>([^<]+)<\/h1>/);
+        const titleText = titleMatch ? titleMatch[1].trim() : '';
+        
+        const descMatch = html.match(/<div[^>]*class=["']sketch["'][^>]*>([\s\S]*?)<\/div>/);
+        const descText = descMatch ? descMatch[1].replace(/<[^>]+>/g, ' ').trim() : '';
+        
+        return JSON.stringify({
+            code: 200,
+            episodes: matches,
+            detailUrl: detailUrl,
+            videoInfo: {
+                title: titleText,
+                desc: descText,
+                source_name: API_SITES[sourceCode].name,
+                source_code: sourceCode
+            }
+        });
+    } catch (error) {
+        console.error(`${API_SITES[sourceCode].name}详情获取失败:`, error);
+        throw error;
+    }
+}
+
+
+async function handleAggregatedSearch(searchQuery) {
+
+    const availableSources = Object.keys(API_SITES).filter(key => 
+        key !== 'aggregated' && key !== 'custom'
+    );
+    
+    if (availableSources.length === 0) {
+        throw new Error('没有可用的API源');
+    }
+    
+
+    const searchPromises = availableSources.map(async (source) => {
+        try {
+            const apiUrl = `${API_SITES[source].api}${API_CONFIG.search.path}${encodeURIComponent(searchQuery)}`;
+            
+        
+            const timeoutPromise = new Promise((_, reject) => 
+                setTimeout(() => reject(new Error(`${source}源搜索超时`)), 8000)
+            );
+            
+            const fetchPromise = fetch(PROXY_URL + encodeURIComponent(apiUrl), {
+                headers: API_CONFIG.search.headers
+            });
+            
+            const response = await Promise.race([fetchPromise, timeoutPromise]);
+            
+            if (!response.ok) {
+                throw new Error(`${source}源请求失败: ${response.status}`);
+            }
+            
+            const data = await response.json();
+            
+            if (!data || !Array.isArray(data.list)) {
+                throw new Error(`${source}源返回的数据格式无效`);
+            }
+            
+        
+            const results = data.list.map(item => ({
+                ...item,
+                source_name: API_SITES[source].name,
+                source_code: source
+            }));
+            
+            return results;
+        } catch (error) {
+            console.warn(`${source}源搜索失败:`, error);
+            return []; // 返回空数组表示该源搜索失败
+        }
+    });
+    
+    try {
+    
+        const resultsArray = await Promise.all(searchPromises);
+        
+    
+        let allResults = [];
+        resultsArray.forEach(results => {
+            if (Array.isArray(results) && results.length > 0) {
+                allResults = allResults.concat(results);
+            }
+        });
+        
+    
+        if (allResults.length === 0) {
+            return JSON.stringify({
+                code: 200,
+                list: [],
+                msg: '所有源均无搜索结果'
+            });
+        }
+        
+    
+        const uniqueResults = [];
+        const seen = new Set();
+        
+        allResults.forEach(item => {
+            const key = `${item.source_code}_${item.vod_id}`;
+            if (!seen.has(key)) {
+                seen.add(key);
+                uniqueResults.push(item);
+            }
+        });
+        
+    
+        uniqueResults.sort((a, b) => {
+        
+            const nameCompare = (a.vod_name || '').localeCompare(b.vod_name || '');
+            if (nameCompare !== 0) return nameCompare;
+            
+        
+            return (a.source_name || '').localeCompare(b.source_name || '');
+        });
+        
+        return JSON.stringify({
+            code: 200,
+            list: uniqueResults,
+        });
+    } catch (error) {
+        console.error('聚合搜索处理错误:', error);
+        return JSON.stringify({
+            code: 400,
+            msg: '聚合搜索处理失败: ' + error.message,
+            list: []
+        });
+    }
+}
+
+
+async function handleMultipleCustomSearch(searchQuery, customApiUrls) {
+
+    const apiUrls = customApiUrls.split(CUSTOM_API_CONFIG.separator)
+        .map(url => url.trim())
+        .filter(url => url.length > 0 && /^https?:\/\//.test(url))
+        .slice(0, CUSTOM_API_CONFIG.maxSources);
+    
+    if (apiUrls.length === 0) {
+        throw new Error('没有提供有效的自定义API地址');
+    }
+    
+
+    const searchPromises = apiUrls.map(async (apiUrl, index) => {
+        try {
+            const fullUrl = `${apiUrl}${API_CONFIG.search.path}${encodeURIComponent(searchQuery)}`;
+            
+        
+            const timeoutPromise = new Promise((_, reject) => 
+                setTimeout(() => reject(new Error(`自定义API ${index+1} 搜索超时`)), 8000)
+            );
+            
+            const fetchPromise = fetch(PROXY_URL + encodeURIComponent(fullUrl), {
+                headers: API_CONFIG.search.headers
+            });
+            
+            const response = await Promise.race([fetchPromise, timeoutPromise]);
+            
+            if (!response.ok) {
+                throw new Error(`自定义API ${index+1} 请求失败: ${response.status}`);
+            }
+            
+            const data = await response.json();
+            
+            if (!data || !Array.isArray(data.list)) {
+                throw new Error(`自定义API ${index+1} 返回的数据格式无效`);
+            }
+            
+        
+            const results = data.list.map(item => ({
+                ...item,
+                source_name: `${CUSTOM_API_CONFIG.namePrefix}${index+1}`,
+                source_code: 'custom',
+                api_url: apiUrl // 保存API URL以便详情获取
+            }));
+            
+            return results;
+        } catch (error) {
+            console.warn(`自定义API ${index+1} 搜索失败:`, error);
+            return []; // 返回空数组表示该源搜索失败
+        }
+    });
+    
+    try {
+    
+        const resultsArray = await Promise.all(searchPromises);
+        
+    
+        let allResults = [];
+        resultsArray.forEach(results => {
+            if (Array.isArray(results) && results.length > 0) {
+                allResults = allResults.concat(results);
+            }
+        });
+        
+    
+        if (allResults.length === 0) {
+            return JSON.stringify({
+                code: 200,
+                list: [],
+                msg: '所有自定义API源均无搜索结果'
+            });
+        }
+        
+    
+        const uniqueResults = [];
+        const seen = new Set();
+        
+        allResults.forEach(item => {
+            const key = `${item.api_url || ''}_${item.vod_id}`;
+            if (!seen.has(key)) {
+                seen.add(key);
+                uniqueResults.push(item);
+            }
+        });
+        
+        return JSON.stringify({
+            code: 200,
+            list: uniqueResults,
+        });
+    } catch (error) {
+        console.error('自定义API聚合搜索处理错误:', error);
+        return JSON.stringify({
+            code: 400,
+            msg: '自定义API聚合搜索处理失败: ' + error.message,
+            list: []
+        });
+    }
+}
+
+
+(function() {
+    const originalFetch = window.fetch;
+    
+    window.fetch = async function(input, init) {
+        const requestUrl = typeof input === 'string' ? new URL(input, window.location.origin) : input.url;
+        
+        if (requestUrl.pathname.startsWith('/api/')) {
+            if (window.isPasswordProtected && window.isPasswordVerified) {
+                if (window.isPasswordProtected() && !window.isPasswordVerified()) {
+                    return;
+                }
+            }
+            try {
+                const data = await handleApiRequest(requestUrl);
+                return new Response(data, {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Access-Control-Allow-Origin': '*',
+                    },
+                });
+            } catch (error) {
+                return new Response(JSON.stringify({
+                    code: 500,
+                    msg: '服务器内部错误',
+                }), {
+                    status: 500,
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                });
+            }
+        }
+        
+    
+        return originalFetch.apply(this, arguments);
+    };
+})();
+
+async function testSiteAvailability(apiUrl) {
+    try {
+    
+        const response = await fetch('/api/search?wd=test&customApi=' + encodeURIComponent(apiUrl), {
+        
+            signal: AbortSignal.timeout(5000)
+        });
+        
+    
+        if (!response.ok) {
+            return false;
+        }
+        
+        const data = await response.json();
+        
+    
+        return data && data.code !== 400 && Array.isArray(data.list);
+    } catch (error) {
+        console.error('站点可用性测试失败:', error);
+        return false;
+    }
+}
