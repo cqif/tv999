@@ -37,20 +37,20 @@ LibreTV 全局样式
 }
 
 :root {
-    /* 新配色方案 - 温暖版 */
-    --primary-color: #FFA500;       /* 柔和暖橙色主色调 */
-    --primary-light: #FFB84D;       /* 浅橙色变体 */
-    --secondary-color: #000000;     /* 纯黑背景色 */
-    --accent-color: #FFB6C1;        /* 柔和粉红强调色 */
-    --text-color: #F5F5F5;          /* 柔和白文本 */
-    --text-muted: #CCCCCC;          /* 灰白色次级文本 */
-    --border-color: rgba(255, 165, 0, 0.15);
-    --page-gradient-start: #000000; /* 纯黑起始色 */
-    --page-gradient-end: #101010;   /* 浅黑结束色 */
-    --card-gradient-start: #1A1A1A; /* 卡片起始色 */
-    --card-gradient-end: #2A2A2A;   /* 卡片结束色 */
-    --card-accent: rgba(255, 165, 0, 0.12); /* 暖橙卡片强调色 */
-    --card-hover-border: rgba(255, 165, 0, 0.5); /* 悬停边框颜色 */
+    /* 赛博影视主题配色方案 - 柔和版 */
+    --primary-color: #00ccff;       /* 霓虹蓝主色调 */
+    --primary-light: #33d6ff;       /* 浅霓虹蓝变体 */
+    --secondary-color: #0f1622;     /* 深蓝黑背景色 */
+    --accent-color: #ff3c78;        /* 霓虹粉强调色 */
+    --text-color: #e6f2ff;          /* 柔和的蓝白色文本 */
+    --text-muted: #8599b2;          /* 淡蓝灰色次级文本 */
+    --border-color: rgba(0, 204, 255, 0.15);
+    --page-gradient-start: #0f1622; /* 深蓝黑起始色 */
+    --page-gradient-end: #192231;   /* 深靛蓝结束色 */
+    --card-gradient-start: #121b29; /* 卡片起始色 */
+    --card-gradient-end: #1c2939;   /* 卡片结束色 */
+    --card-accent: rgba(0, 204, 255, 0.12); /* 霓虹蓝卡片强调色 */
+    --card-hover-border: rgba(0, 204, 255, 0.5); /* 悬停边框颜色 */
 }
 
 .page-bg {

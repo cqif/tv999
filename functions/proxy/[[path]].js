@@ -362,7 +362,7 @@ export async function onRequest(context) {
             kvNamespace = env.LIBRETV_PROXY_KV; // 从环境获取 KV 命名空间 (变量名在 Cloudflare 设置)
             if (!kvNamespace) throw new Error("KV 命名空间未绑定");
         } catch (e) {
-            logDebug(`KV 命名空间 'LIBRETV_PROXY_KV' 访问出错或未绑定: ${e.message}`);
+            logDebug(`KV 命名空间 'PROXY_KV' 访问出错或未绑定: ${e.message}`);
             kvNamespace = null; // 确保设为 null
         }
 
@@ -432,7 +432,7 @@ export async function onRequest(context) {
             kvNamespace = env.LIBRETV_PROXY_KV;
             if (!kvNamespace) throw new Error("KV 命名空间未绑定");
         } catch (e) {
-            logDebug(`KV 命名空间 'LIBRETV_PROXY_KV' 访问出错或未绑定: ${e.message}`);
+            logDebug(`KV 命名空间 'PROXY_KV' 访问出错或未绑定: ${e.message}`);
             kvNamespace = null;
         }
 
